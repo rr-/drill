@@ -45,8 +45,8 @@ def confirm(text: str) -> bool:
             print("Please respond with 'yes' or 'no'")
 
 
-def color(text: str, color: str) -> str:
-    return color + text + COLOR_RESET
+def color(text: str, color_str: str) -> str:
+    return color_str + text + COLOR_RESET
 
 
 def get_tag_color(tag: str) -> int:
