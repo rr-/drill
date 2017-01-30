@@ -6,6 +6,7 @@ from drill import error
 import sqlalchemy as sa
 import sqlalchemy.orm
 import sqlalchemy.ext.declarative
+import sqlalchemy.ext.mutable
 
 
 def get_db_path() -> str:
@@ -51,10 +52,14 @@ class Card(Base):
         nullable=False, index=True)
     num: int = sa.Column('num', sa.Integer, nullable=False)
     question: str = sa.Column('question', sa.String, nullable=False)
-    answers: List[str] = sa.Column('answers', sa.PickleType, nullable=False)
+    answers: List[str] = sa.Column(
+        'answers', sa.ext.mutable.MutableList.as_mutable(sa.PickleType),
+        nullable=False)
     is_active: bool = sa.Column('active', sa.Boolean, nullable=False)
     user_answers = sa.orm.relationship(UserAnswer, cascade='all, delete')
-    tags: List[str] = sa.Column('tags', sa.PickleType, nullable=False)
+    tags: List[str] = sa.Column(
+        'tags', sa.ext.mutable.MutableList.as_mutable(sa.PickleType),
+        nullable=False)
     due_date: Optional[datetime] = sa.Column(
         'due_date', sa.DateTime, nullable=True)
 
