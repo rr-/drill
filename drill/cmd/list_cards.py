@@ -1,6 +1,8 @@
 import argparse
+from typing import Optional
 from datetime import datetime
 from math import log10, ceil
+import sqlalchemy as sa
 from drill.cmd.command_base import CommandBase
 from drill import db, util
 
@@ -40,18 +42,30 @@ class ListCardsCommand(CommandBase):
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument('deck', nargs='?')
+        parser.add_argument('-q', '--question')
+        parser.add_argument('-t', '--tag')
         parser.add_argument(
             '--sort', default=SORT_NONE, choices=(SORT_NONE, SORT_DUE_DATE))
         parser.add_argument('--show-answers', action='store_true')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck
+        question: Optional[str] = args.question
+        tag: Optional[str] = args.tag
         sort_style: str = args.sort
         show_answers: bool = args.show_answers
 
         with db.session_scope() as session:
             deck = db.get_deck_by_name(session, deck_name)
-            cards = session.query(db.Card).filter(db.Card.deck_id == deck.id)
+            cards = session \
+                .query(db.Card) \
+                .filter(db.Card.deck_id == deck.id) \
+                .options(sa.orm.subqueryload('user_answers'))
+
+            if question is not None:
+                cards = cards.filter(
+                    sa.func.lower(db.Card.question).like(
+                        sa.func.lower(question)))
 
             if sort_style == SORT_NONE:
                 cards = cards.order_by(db.Card.num.asc())
@@ -60,6 +74,13 @@ class ListCardsCommand(CommandBase):
                 cards = cards.order_by(db.Card.due_date.asc())
             else:
                 assert False
+
+            cards = cards.all()
+            if tag is not None:
+                cards = [
+                    card
+                    for card in cards
+                    if tag.lower() in [t.lower() for t in card.tags]]
 
             index_length = ceil(log10(db.get_max_card_num(session, deck)))
             for card in cards:
