@@ -19,7 +19,7 @@ def _review_single_card(
         print(' [%s]' % util.format_card_tags(card.tags), end='')
     print()
 
-    answer_text = input('Answer: ')
+    answer_text = util.ask('Answer: ')
 
     if answer_text.lower() in [a.lower() for a in card.answers]:
         is_correct = True
@@ -32,7 +32,7 @@ def _review_single_card(
         print('2 - correct, add alias')
         while True:
             try:
-                choice = int(input('Choice: '))
+                choice = int(util.ask('Choice: '))
                 assert choice in [0, 1, 2]
                 break
             except ValueError:

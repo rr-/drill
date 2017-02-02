@@ -1,3 +1,4 @@
+import readline
 from datetime import timedelta
 from typing import List
 
@@ -32,6 +33,10 @@ def format_timedelta(delta: timedelta) -> str:
     if delta.total_seconds() < 0:
         ret = '-' + ret
     return ret
+
+
+def ask(text: str) -> str:
+    return input(text)
 
 
 def confirm(text: str) -> bool:

@@ -39,6 +39,6 @@ class StudyCommand(CommandBase):
 
             for card in cards_to_study:
                 _print_single_card(card)
-                input('')
+                util.ask('')
                 card.is_active = True
                 card.due_date = scheduler.next_due_date(card)
