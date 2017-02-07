@@ -1,6 +1,6 @@
 import argparse
 from datetime import datetime
-from typing import List
+from typing import Any, List
 from drill.cmd.command_base import CommandBase
 from drill import db, scheduler, util
 
@@ -57,6 +57,36 @@ def _review_single_card(
     card.due_date = scheduler.next_due_date(card)
 
 
+def _review(session: Any, deck: db.Deck) -> None:
+    first_iteration = True
+    while True:
+        cards_to_review = scheduler.get_cards_to_review(session, deck)
+
+        if not cards_to_review:
+            due_cards = scheduler.get_due_cards(session, deck)
+
+            if first_iteration:
+                print('No cards to review.')
+            else:
+                print('No more cards to review.')
+            if due_cards:
+                next_due_date = due_cards[0].due_date
+                assert next_due_date
+                print('Next review in %s.' % util.format_timedelta(
+                    next_due_date - datetime.now()))
+            return
+
+        if not first_iteration:
+            print('%d cards to review.' % len(cards_to_review))
+            print()
+
+        for i, card in enumerate(cards_to_review):
+            _review_single_card(i, cards_to_review, card)
+            session.commit()
+
+        first_iteration = False
+
+
 class ReviewCommand(CommandBase):
     names = ['review']
 
@@ -65,26 +95,6 @@ class ReviewCommand(CommandBase):
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck
-
         with db.session_scope() as session:
             deck = db.get_deck_by_name(session, deck_name)
-
-            cards_to_review = scheduler.get_cards_to_review(session, deck)
-
-            if not cards_to_review:
-                due_cards = scheduler.get_due_cards(session, deck)
-
-                print('No cards to review.')
-                if due_cards:
-                    next_due_date = due_cards[0].due_date
-                    assert next_due_date
-                    print('Next review in %s.' % util.format_timedelta(
-                        next_due_date - datetime.now()))
-                return
-
-            print('%d cards to review.' % len(cards_to_review))
-            print()
-
-            for i, card in enumerate(cards_to_review):
-                _review_single_card(i, cards_to_review, card)
-                session.commit()
+            _review(session, deck)
