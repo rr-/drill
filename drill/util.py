@@ -3,11 +3,12 @@ from datetime import timedelta
 from typing import List
 
 
-COLOR_SUCCESS = '\x1B[48;5;193m'
-COLOR_FAIL = '\x1B[48;5;217m'
+COLOR_SUCCESS = '\x1B[38;5;0m\x1B[48;5;193m'
+COLOR_FAIL = '\x1B[38;5;0m\x1B[48;5;217m'
 COLOR_RESET = '\x1B[0m'
 COLOR_TAGS = [
-    '\x1B[48;5;%dm' % num for num in [0xE6, 0xC2, 0xC3, 0xBD, 0xE1, 0xE0]]
+    '\x1B[38;5;0m\x1B[48;5;%dm' % num
+    for num in [0xE6, 0xC2, 0xC3, 0xBD, 0xE1, 0xE0]]
 
 
 def format_timedelta(delta: timedelta) -> str:
