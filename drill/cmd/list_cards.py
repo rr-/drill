@@ -72,6 +72,7 @@ class ListCardsCommand(CommandBase):
             elif sort_style == SORT_DUE_DATE:
                 cards = cards.order_by(db.Card.is_active.desc())
                 cards = cards.order_by(db.Card.due_date.asc())
+                cards = cards.order_by(db.Card.num.asc())
             else:
                 assert False
 

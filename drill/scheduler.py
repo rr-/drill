@@ -40,17 +40,20 @@ def next_due_date(card: db.Card) -> Optional[datetime]:
 
 def get_cards_to_study(
         session: Any, deck: db.Deck, how_many: int) -> List[db.Card]:
-    return session.query(db.Card) \
-        .filter(db.Card.deck_id == deck.id) \
-        .filter(db.Card.is_active == 0) \
-        .limit(how_many)
+    return (
+        session.query(db.Card)
+        .filter(db.Card.deck_id == deck.id)
+        .filter(db.Card.is_active == 0)
+        .order_by(db.Card.num.asc())
+        .limit(how_many))
 
 
 def get_due_cards(session: Any, deck: db.Deck) -> List[db.Card]:
-    return session.query(db.Card) \
-        .filter(db.Card.deck_id == deck.id) \
-        .filter(db.Card.is_active) \
-        .order_by(db.Card.due_date.asc())
+    return (
+        session.query(db.Card)
+        .filter(db.Card.deck_id == deck.id)
+        .filter(db.Card.is_active)
+        .order_by(db.Card.due_date.asc()))
 
 
 def get_cards_to_review(session: Any, deck: db.Deck) -> List[db.Card]:
