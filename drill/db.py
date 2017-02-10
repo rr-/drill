@@ -88,7 +88,7 @@ def try_get_deck_by_name(session: Any, name: str) -> Optional[Deck]:
         if deck_count > 1:
             raise error.AmbiguousDeckError(
                 'Need to specify which deck to use.')
-        return session.query(Deck).single()
+        return session.query(Deck).one()
     return session.query(Deck).filter(Deck.name == name).one_or_none()
 
 
