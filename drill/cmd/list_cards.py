@@ -13,7 +13,7 @@ SORT_DUE_DATE = 'due-date'
 
 def _print_single_card(
         index_length: int, card: db.Card, show_answers: bool) -> None:
-    print('%*d.' % (index_length, card.num), end=' ')
+    print('Card %*s: ' % (index_length, '#%s' % card.num), end='')
     if card.is_active:
         correct_user_answers = [
             ua for ua in card.user_answers if ua.is_correct]
