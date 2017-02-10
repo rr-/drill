@@ -19,7 +19,10 @@ def _review_single_card(
         print(' [%s]' % util.format_card_tags(card.tags), end='')
     print()
 
-    answer_text = util.ask('Answer: ')
+    while True:
+        answer_text = util.ask('Answer: ')
+        if answer_text:
+            break
 
     if answer_text.lower() in [a.lower() for a in card.answers]:
         is_correct = True
