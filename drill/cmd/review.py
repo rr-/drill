@@ -1,4 +1,5 @@
 import argparse
+import random
 from datetime import datetime
 from typing import Any, List
 from drill.cmd.command_base import CommandBase
@@ -64,6 +65,7 @@ def _review(session: Any, deck: db.Deck) -> None:
     first_iteration = True
     while True:
         cards_to_review = scheduler.get_cards_to_review(session, deck)
+        random.shuffle(cards_to_review)
 
         if not cards_to_review:
             due_cards = scheduler.get_due_cards(session, deck)
