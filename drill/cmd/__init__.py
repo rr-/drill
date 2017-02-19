@@ -9,5 +9,6 @@ from drill.cmd.update_card import UpdateCardCommand
 from drill.cmd.delete_card import DeleteCardCommand
 from drill.cmd.study import StudyCommand
 from drill.cmd.review import ReviewCommand
+from drill.cmd.stats import StatsCommand
 from drill.cmd.export import ExportCommand
 __import__('drill.cmd.import', globals(), locals(), ['ImportCommand'])

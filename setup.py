@@ -15,5 +15,8 @@ setup(
     install_requires=[
         'python-dateutil',
         'sqlalchemy',
-    ]
+        'jinja2',
+    ],
+    package_dir={'drill': 'drill'},
+    package_data={'drill': ['data/*.*']},
 )

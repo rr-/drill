@@ -63,6 +63,32 @@ class Card(Base):
     due_date: Optional[datetime] = sa.Column(
         'due_date', sa.DateTime, nullable=True)
 
+    first_answer_date = sa.orm.column_property(
+        sa.sql.expression.select(
+            [sa.sql.expression.func.min(UserAnswer.date)])
+        .where(UserAnswer.card_id == id)
+        .correlate_except(UserAnswer))
+
+    total_answer_count = sa.orm.column_property(
+        sa.sql.expression.select(
+            [sa.sql.expression.func.count(UserAnswer.id)])
+        .where(UserAnswer.card_id == id)
+        .correlate_except(UserAnswer))
+
+    correct_answer_count = sa.orm.column_property(
+        sa.sql.expression.select(
+            [sa.sql.expression.func.count(UserAnswer.id)])
+        .where(UserAnswer.card_id == id)
+        .where(UserAnswer.is_correct == 1)
+        .correlate_except(UserAnswer))
+
+    incorrect_answer_count = sa.orm.column_property(
+        sa.sql.expression.select(
+            [sa.sql.expression.func.count(UserAnswer.id)])
+        .where(UserAnswer.card_id == id)
+        .where(UserAnswer.is_correct == 0)
+        .correlate_except(UserAnswer))
+
 
 class Deck(Base):
     __tablename__ = 'deck'
