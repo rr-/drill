@@ -39,7 +39,6 @@ class UserAnswer(Base):
         'card_id', sa.Integer, sa.ForeignKey('card.id'),
         nullable=False, index=True)
     date: datetime = sa.Column('date', sa.DateTime, nullable=False)
-    text: str = sa.Column('text', sa.String, nullable=False)
     is_correct: bool = sa.Column('is_correct', sa.Boolean, nullable=False)
 
 

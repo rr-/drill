@@ -28,8 +28,7 @@ def _import(handle: IO[Any]) -> None:
                 for user_answer_obj in card_obj['user_answers']:
                     user_answer = db.UserAnswer()
                     user_answer.date = parse_date(user_answer_obj['date'])
-                    user_answer.text = user_answer_obj['text']
-                    user_answer.is_correct = user_answer_obj['is_correct']
+                    user_answer.is_correct = user_answer_obj['correct']
                     card.user_answers.append(user_answer)
                 card.due_date = scheduler.next_due_date(card)
                 deck.cards.append(card)

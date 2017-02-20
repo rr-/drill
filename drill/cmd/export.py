@@ -3,6 +3,7 @@ import sys
 import json
 from datetime import datetime
 from typing import Optional, IO, Any
+import sqlalchemy as sa
 from drill.cmd.command_base import CommandBase
 from drill import db
 
@@ -16,6 +17,14 @@ def _json_serializer(obj: object) -> object:
 
 def _export(handle: IO[Any]) -> None:
     with db.session_scope() as session:
+        decks = (
+            session
+            .query(db.Deck)
+            .options(
+                sa.orm
+                    .joinedload(db.Deck.cards)
+                    .subqueryload(db.Card.user_answers)))
+
         json.dump(
             [{
                 'name': deck.name,
@@ -30,14 +39,14 @@ def _export(handle: IO[Any]) -> None:
                     'user_answers':
                     [{
                         'date': answer.date,
-                        'text': answer.text,
-                        'is_correct': answer.is_correct,
+                        'correct': answer.is_correct,
                     } for answer in card.user_answers],
                 } for card in deck.cards],
-            } for deck in session.query(db.Deck)],
+            } for deck in decks],
             handle,
             default=_json_serializer,
-            indent=4)
+            separators=(',', ':'),
+            check_circular=False)
 
 
 class ExportCommand(CommandBase):
