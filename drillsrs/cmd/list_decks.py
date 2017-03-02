@@ -6,6 +6,7 @@ from drillsrs import db
 
 class ListDecksCommand(CommandBase):
     names = ['list-decks']
+    description = 'print all decks'
 
     def run(self, _args: argparse.Namespace) -> None:
         with db.session_scope() as session:

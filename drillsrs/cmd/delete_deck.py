@@ -5,9 +5,10 @@ from drillsrs import db, util
 
 class DeleteDeckCommand(CommandBase):
     names = ['delete-deck']
+    description = 'delete a whole deck'
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('deck')
+        parser.add_argument('deck', help='choose the deck name')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck

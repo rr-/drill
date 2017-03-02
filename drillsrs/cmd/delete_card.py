@@ -5,10 +5,12 @@ from drillsrs import db, util
 
 class DeleteCardCommand(CommandBase):
     names = ['delete-card']
+    description = 'delete a single flashcard'
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('deck')
-        parser.add_argument('id', type=int)
+        parser.add_argument(
+            'deck', help='choose the deck to delete the card from')
+        parser.add_argument('id', type=int, help='choose the card id')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck

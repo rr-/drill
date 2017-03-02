@@ -1,12 +1,11 @@
 import argparse
-import os
 import sys
 from datetime import datetime, timedelta
 from typing import Any, Tuple, List
 import sqlalchemy as sa
 import jinja2
 from drillsrs.cmd.command_base import CommandBase
-from drillsrs import db
+from drillsrs import db, util
 
 
 class AnswerHistogram(list):
@@ -148,10 +147,7 @@ def _get_bad_cards(
 
 
 def _write_report(deck: db.Deck, session: Any, output_handle: Any) -> None:
-    here = os.path.dirname(__file__)
-    template_path = os.path.join(here, os.pardir, 'data', 'stats.tpl')
-    with open(template_path, 'r') as handle:
-        template = jinja2.Template(handle.read())
+    template = jinja2.Template(util.get_data('stats.tpl'))
 
     activity_histogram = _get_activity_histogram(session, deck)
     answer_histogram = _get_answer_histogram(session, deck)
@@ -174,10 +170,13 @@ def _write_report(deck: db.Deck, session: Any, output_handle: Any) -> None:
 
 class StatsCommand(CommandBase):
     names = ['stats']
+    description = 'produce an HTML report about the chosen deck'
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('deck', nargs='?')
-        parser.add_argument('output', nargs='?', help='output file')
+        parser.add_argument('deck', nargs='?', help='choose the deck name')
+        parser.add_argument(
+            'output', nargs='?',
+            help='path to output to; if omitted, standard output is used')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck

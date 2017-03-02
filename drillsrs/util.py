@@ -1,3 +1,4 @@
+import os
 import readline
 from datetime import timedelta
 from typing import List
@@ -65,3 +66,10 @@ def format_card_tags(tags: List[str]) -> str:
         tag_num = get_tag_color(tag)
         ret.append(color(tag, COLOR_TAGS[tag_num]))
     return ', '.join(ret)
+
+
+def get_data(file_name: str) -> bytes:
+    here = os.path.dirname(__file__)
+    template_path = os.path.join(here, 'data', file_name)
+    with open(template_path, 'r') as handle:
+        return handle.read()

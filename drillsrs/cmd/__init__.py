@@ -1,3 +1,4 @@
+from drillsrs.cmd.howto import HowToCommand
 from drillsrs.cmd.command_base import get_all_commands
 from drillsrs.cmd.list_decks import ListDecksCommand
 from drillsrs.cmd.create_deck import CreateDeckCommand

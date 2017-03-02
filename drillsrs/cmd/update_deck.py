@@ -5,11 +5,12 @@ from drillsrs import db
 
 
 class UpdateDeckCommand(CommandBase):
-    names = ['update-deck']
+    names = ['edit-deck', 'update-deck']
+    description = 'edit a single deck'
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('deck')
-        parser.add_argument('--description')
+        parser.add_argument('deck', help='set the deck name')
+        parser.add_argument('--description', help='set the deck description')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck

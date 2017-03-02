@@ -5,15 +5,21 @@ from drillsrs import db, util
 
 
 class UpdateCardCommand(CommandBase):
-    names = ['update-card']
+    names = ['edit-card', 'update-card']
+    description = 'edit a single flashcard'
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('deck')
-        parser.add_argument('id', type=int)
-        parser.add_argument('-q', '--question')
-        parser.add_argument('-a', '--answer', nargs='+')
-        parser.add_argument('-t', '--tag', nargs='*')
-        parser.add_argument('--new-id', type=int)
+        parser.add_argument('deck', help='choose the deck of the card')
+        parser.add_argument('id', type=int, help='choose the card id')
+        parser.add_argument(
+            '-q', '--question', help='set the card\'s question text')
+        parser.add_argument(
+            '-a', '--answer', nargs='+', help='set the card\'s answers text')
+        parser.add_argument(
+            '-t', '--tag', nargs='*', help='set the tags of the card')
+        parser.add_argument(
+            '--new-id', type=int,
+            help='move the card to desired place in the deck')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck

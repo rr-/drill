@@ -39,14 +39,17 @@ def _print_single_card(
 
 class ListCardsCommand(CommandBase):
     names = ['list-cards']
+    description = 'print all flashcards in a deck'
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('deck', nargs='?')
-        parser.add_argument('-q', '--question')
-        parser.add_argument('-t', '--tag')
+        parser.add_argument('deck', nargs='?', help='choose the deck name')
+        parser.add_argument('-q', '--question', help='filter by question text')
+        parser.add_argument('-t', '--tag', help='filter by tag')
         parser.add_argument(
-            '--sort', default=SORT_NONE, choices=(SORT_NONE, SORT_DUE_DATE))
-        parser.add_argument('--show-answers', action='store_true')
+            '--sort', default=SORT_NONE, choices=(SORT_NONE, SORT_DUE_DATE),
+            help='change sort style')
+        parser.add_argument(
+            '--show-answers', action='store_true', help='show answers text')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck

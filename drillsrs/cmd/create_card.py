@@ -11,14 +11,22 @@ APPEND = 'append'
 
 class CreateCardCommand(CommandBase):
     names = ['add-card', 'create-card']
+    description = 'add a new flashcard to a deck'
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('deck', nargs='?')
-        parser.add_argument('-q', '--question', required=True)
-        parser.add_argument('-a', '--answer', required=True, nargs='+')
-        parser.add_argument('-t', '--tag', nargs='*')
         parser.add_argument(
-            '-p', '--place', choices=(PREPEND, APPEND), default=PREPEND)
+            'deck', nargs='?', help='choose the deck to add the card to')
+        parser.add_argument(
+            '-q', '--question', required=True,
+            help='set the card\'s question text')
+        parser.add_argument(
+            '-a', '--answer', required=True, nargs='+',
+            help='set the card\'s answers text')
+        parser.add_argument(
+            '-t', '--tag', nargs='*', help='add optional tags to the card')
+        parser.add_argument(
+            '-p', '--place', choices=(PREPEND, APPEND), default=PREPEND,
+            help='choose where to put the card in the deck')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck

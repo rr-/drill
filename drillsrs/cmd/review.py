@@ -94,9 +94,10 @@ def _review(session: Any, deck: db.Deck) -> None:
 
 class ReviewCommand(CommandBase):
     names = ['review']
+    description = 'begin a review session'
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('deck', nargs='?')
+        parser.add_argument('deck', nargs='?', help='choose the deck name')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck

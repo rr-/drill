@@ -51,9 +51,12 @@ def _export(handle: IO[Any]) -> None:
 
 class ExportCommand(CommandBase):
     names = ['export']
+    description = 'export all decks to a JSON file'
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('path', nargs='?')
+        parser.add_argument(
+            'path', nargs='?',
+            help='path to export to; if omitted, standard output is used')
 
     def run(self, args: argparse.Namespace) -> None:
         path: Optional[str] = args.path

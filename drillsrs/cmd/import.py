@@ -37,9 +37,12 @@ def _import(handle: IO[Any]) -> None:
 
 class ImportCommand(CommandBase):
     names = ['import']
+    description = 'import all decks from a JSON file'
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('path', nargs='?')
+        parser.add_argument(
+            'path', nargs='?',
+            help='path to import from; if omitted, standard input is used')
 
     def run(self, args: argparse.Namespace) -> None:
         path: Optional[str] = args.path

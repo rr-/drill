@@ -14,10 +14,14 @@ def _print_single_card(card: db.Card) -> None:
 
 class StudyCommand(CommandBase):
     names = ['study', 'learn']
+    description = 'begin a study session'
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('deck', nargs='?')
-        parser.add_argument('-n', type=int, default=10)
+        parser.add_argument(
+            'deck', nargs='?', help='choose the deck name')
+        parser.add_argument(
+            '-n', type=int, default=10,
+            help='set how many flashcards to study')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck

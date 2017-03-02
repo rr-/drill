@@ -7,6 +7,7 @@ T = TypeVar('T', bound='CommandBase')
 
 class CommandBase:
     names: List[str] = []
+    description: str = ''
     registry: List['CommandBase'] = []
 
     def __init_subclass__(cls: Type[T]) -> None:
