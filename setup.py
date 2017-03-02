@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='drill',
+    name='drillsrs',
     version='0.1',
     long_description=__doc__,
     packages=find_packages(),
@@ -9,7 +9,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'drill = drill.__main__:main'
+            'drill-srs = drillsrs.__main__:main'
         ]
     },
     install_requires=[
@@ -17,6 +17,6 @@ setup(
         'sqlalchemy',
         'jinja2',
     ],
-    package_dir={'drill': 'drill'},
-    package_data={'drill': ['data/*.*']},
+    package_dir={'drillsrs': 'drillsrs'},
+    package_data={'drillsrs': ['data/*.*']},
 )

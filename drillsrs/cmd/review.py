@@ -2,8 +2,8 @@ import argparse
 import random
 from datetime import datetime
 from typing import Any, List
-from drill.cmd.command_base import CommandBase
-from drill import db, scheduler, util
+from drillsrs.cmd.command_base import CommandBase
+from drillsrs import db, scheduler, util
 
 
 def _review_single_card(

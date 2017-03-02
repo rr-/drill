@@ -1,6 +1,6 @@
 import argparse
-from drill.cmd.command_base import CommandBase
-from drill import db, scheduler, util
+from drillsrs.cmd.command_base import CommandBase
+from drillsrs import db, scheduler, util
 
 
 def _print_single_card(card: db.Card) -> None:

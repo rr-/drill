@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 from typing import Any, Tuple, List
 import sqlalchemy as sa
 import jinja2
-from drill.cmd.command_base import CommandBase
-from drill import db
+from drillsrs.cmd.command_base import CommandBase
+from drillsrs import db
 
 
 class AnswerHistogram(list):

@@ -2,7 +2,7 @@ import os
 from contextlib import contextmanager
 from datetime import datetime
 from typing import List, Generator, Any, Optional
-from drill import error
+from drillsrs import error
 import sqlalchemy as sa
 import sqlalchemy.orm
 import sqlalchemy.ext.declarative
@@ -10,7 +10,7 @@ import sqlalchemy.ext.mutable
 
 
 def get_db_path() -> str:
-    return os.path.expanduser('~/.local/share/drill/decks.sqlite')
+    return os.path.expanduser('~/.local/share/drillsrs/decks.sqlite')
 
 
 engine: Any = sa.create_engine('sqlite:///%s' % os.path.abspath(get_db_path()))

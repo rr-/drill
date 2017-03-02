@@ -3,8 +3,8 @@ from typing import Optional
 from datetime import datetime
 from math import log10, ceil
 import sqlalchemy as sa
-from drill.cmd.command_base import CommandBase
-from drill import db, util
+from drillsrs.cmd.command_base import CommandBase
+from drillsrs import db, util
 
 
 SORT_NONE = 'none'

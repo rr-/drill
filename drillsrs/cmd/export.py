@@ -4,8 +4,8 @@ import json
 from datetime import datetime
 from typing import Optional, IO, Any
 import sqlalchemy as sa
-from drill.cmd.command_base import CommandBase
-from drill import db
+from drillsrs.cmd.command_base import CommandBase
+from drillsrs import db
 
 
 def _json_serializer(obj: object) -> object:

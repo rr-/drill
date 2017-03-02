@@ -1,7 +1,7 @@
 import argparse
 from typing import Optional
-from drill.cmd.command_base import CommandBase
-from drill import db
+from drillsrs.cmd.command_base import CommandBase
+from drillsrs import db
 
 
 class UpdateDeckCommand(CommandBase):

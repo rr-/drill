@@ -1,6 +1,6 @@
 import argparse
-from drill.cmd.command_base import CommandBase
-from drill import db, error
+from drillsrs.cmd.command_base import CommandBase
+from drillsrs import db, error
 
 
 class CreateDeckCommand(CommandBase):

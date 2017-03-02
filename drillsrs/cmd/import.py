@@ -3,8 +3,8 @@ import sys
 import json
 from typing import Optional, IO, Any
 from dateutil.parser import parse as parse_date
-from drill.cmd.command_base import CommandBase
-from drill import db, scheduler
+from drillsrs.cmd.command_base import CommandBase
+from drillsrs import db, scheduler
 
 
 def _import(handle: IO[Any]) -> None:

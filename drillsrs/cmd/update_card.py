@@ -1,7 +1,7 @@
 import argparse
 from typing import Optional, List
-from drill.cmd.command_base import CommandBase
-from drill import db, util
+from drillsrs.cmd.command_base import CommandBase
+from drillsrs import db, util
 
 
 class UpdateCardCommand(CommandBase):

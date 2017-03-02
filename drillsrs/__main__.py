@@ -2,8 +2,8 @@
 import sys
 import argparse
 import errno
-from drill import db, error
-from drill.cmd import get_all_commands
+from drillsrs import db, error
+from drillsrs.cmd import get_all_commands
 
 
 def parse_args() -> argparse.Namespace:

@@ -1,8 +1,8 @@
 import argparse
 from typing import List
 import sqlalchemy as sa
-from drill.cmd.command_base import CommandBase
-from drill import db
+from drillsrs.cmd.command_base import CommandBase
+from drillsrs import db
 
 
 PREPEND = 'prepend'

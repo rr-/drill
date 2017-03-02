@@ -1,7 +1,7 @@
 import argparse
 import sqlalchemy as sa
-from drill.cmd.command_base import CommandBase
-from drill import db
+from drillsrs.cmd.command_base import CommandBase
+from drillsrs import db
 
 
 class ListDecksCommand(CommandBase):

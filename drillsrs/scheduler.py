@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from typing import List, Optional, Any
-from drill import db
+from drillsrs import db
 
 
 THRESHOLDS = [
