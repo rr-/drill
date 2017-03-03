@@ -15,58 +15,55 @@ def _json_serializer(obj: object) -> object:
     raise TypeError('Type not serializable')
 
 
-def _export(handle: IO[Any]) -> None:
-    with db.session_scope() as session:
-        decks = (
-            session
-            .query(db.Deck)
-            .options(
-                sa.orm
-                .joinedload(db.Deck.cards)
-                .subqueryload(db.Card.user_answers)))
-
-        json.dump(
+def _export(deck: db.Deck, handle: IO[Any]) -> None:
+    json.dump(
+        {
+            'name': deck.name,
+            'description': deck.description,
+            'tags':
             [{
-                'name': deck.name,
-                'description': deck.description,
-                'tags':
+                'name': tag.name,
+                'color': tag.color,
+            } for tag in deck.tags],
+            'cards':
+            [{
+                'id': card.num,
+                'question': card.question,
+                'answers': card.answers,
+                'active': card.is_active,
+                'tags': [tag.name for tag in card.tags],
+                'user_answers':
                 [{
-                    'name': tag.name,
-                    'color': tag.color,
-                } for tag in deck.tags],
-                'cards':
-                [{
-                    'id': card.num,
-                    'question': card.question,
-                    'answers': card.answers,
-                    'active': card.is_active,
-                    'tags': [tag.name for tag in card.tags],
-                    'user_answers':
-                    [{
-                        'date': answer.date,
-                        'correct': answer.is_correct,
-                    } for answer in card.user_answers],
-                } for card in deck.cards],
-            } for deck in decks],
-            handle,
-            default=_json_serializer,
-            separators=(',', ':'),
-            check_circular=False)
+                    'date': answer.date,
+                    'correct': answer.is_correct,
+                } for answer in card.user_answers],
+            } for card in deck.cards],
+        },
+        handle,
+        default=_json_serializer,
+        separators=(',', ':'),
+        check_circular=False)
 
 
 class ExportCommand(CommandBase):
     names = ['export']
-    description = 'export all decks to a JSON file'
+    description = 'export a deck to a JSON file'
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
+        parser.add_argument('deck', help='choose the deck to export')
         parser.add_argument(
             'path', nargs='?',
             help='path to export to; if omitted, standard output is used')
 
     def run(self, args: argparse.Namespace) -> None:
+        deck_name: str = args.deck
         path: Optional[str] = args.path
-        if path:
-            with open(path, 'w') as handle:
-                _export(handle)
-        else:
-            _export(sys.stdout)
+
+        with db.session_scope() as session:
+            deck = db.get_deck_by_name(session, deck_name)
+
+            if path:
+                with open(path, 'w') as handle:
+                    _export(deck, handle)
+            else:
+                _export(deck, sys.stdout)
