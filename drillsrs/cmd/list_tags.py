@@ -8,7 +8,7 @@ from drillsrs import db, util
 def _print_single_tag(session: Any, index: int, tag: db.Tag) -> None:
     tag_usages = (
         session
-        .query(sa.func.max(db.CardTag.tag_id))
+        .query(sa.func.count(db.CardTag.tag_id))
         .filter(db.CardTag.tag_id == tag.id)
         .scalar()) or 0
     print('Tag #%d' % (index + 1))
