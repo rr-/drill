@@ -37,7 +37,8 @@ def _review_single_card(
         while True:
             try:
                 choice = int(util.ask('Choice: '))
-                assert choice in [0, 1, 2]
+                if choice not in [0, 1, 2]:
+                    raise ValueError()
                 break
             except ValueError:
                 continue
