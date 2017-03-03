@@ -72,7 +72,7 @@ def format_card_tags(tags: List[db.Tag]) -> str:
     return ', '.join(format_card_tag(tag) for tag in tags)
 
 
-def get_data(file_name: str) -> bytes:
+def get_data(file_name: str) -> str:
     here = os.path.dirname(__file__)
     template_path = os.path.join(here, 'data', file_name)
     with open(template_path, 'r') as handle:

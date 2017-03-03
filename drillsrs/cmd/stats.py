@@ -1,7 +1,7 @@
 import argparse
 import sys
 from datetime import datetime, timedelta
-from typing import Any, Union, Tuple, List
+from typing import Any, Union, List
 import sqlalchemy as sa
 import jinja2
 from drillsrs.cmd.command_base import CommandBase
@@ -116,7 +116,7 @@ def _get_activity_histogram(session: Any, deck: db.Deck) -> List[int]:
 
 
 def _get_answer_histogram(session: Any, deck: db.Deck) -> AnswerHistogram:
-    cards: Tuple[int, int] = (
+    cards: List[db.Card] = (
         session
         .query(db.Card)
         .filter(db.Card.deck_id == deck.id)
