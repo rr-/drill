@@ -86,6 +86,10 @@ class ListCardsCommand(CommandBase):
                     for card in cards
                     if tag.lower() in [t.lower() for t in card.tags]]
 
+            if not cards:
+                print('The deck is empty.')
+                return
+
             index_length = ceil(log10(db.get_max_card_num(session, deck)))
             for card in cards:
                 _print_single_card(index_length, card, show_answers)

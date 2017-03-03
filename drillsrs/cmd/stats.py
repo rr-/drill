@@ -1,11 +1,19 @@
 import argparse
 import sys
 from datetime import datetime, timedelta
-from typing import Any, Tuple, List
+from typing import Any, Union, Tuple, List
 import sqlalchemy as sa
 import jinja2
 from drillsrs.cmd.command_base import CommandBase
 from drillsrs import db, util
+
+
+def _percent(count: Union[int, float], max_count: Union[int, float]) -> str:
+    if not max_count:
+        fraction = 100.0
+    else:
+        fraction = count * 100.0 / max_count
+    return '%.02f' % fraction
 
 
 class AnswerHistogram(list):
@@ -15,12 +23,13 @@ class AnswerHistogram(list):
 
     @property
     def max_value(self):
-        return max(
-            *[
-                item.incorrect_answer_count + item.correct_answer_count
-                for item in self
-            ],
-            1)
+        items = [
+            item.incorrect_answer_count + item.correct_answer_count
+            for item in self
+        ]
+        if not items:
+            return 0
+        return max(items)
 
 
 class AnswerHistogramItem:
@@ -148,6 +157,7 @@ def _get_bad_cards(
 
 def _write_report(deck: db.Deck, session: Any, output_handle: Any) -> None:
     template = jinja2.Template(util.get_data('stats.tpl'))
+    template.globals['percent'] = _percent
 
     activity_histogram = _get_activity_histogram(session, deck)
     answer_histogram = _get_answer_histogram(session, deck)

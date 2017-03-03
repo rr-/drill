@@ -48,11 +48,12 @@ class CreateCardCommand(CommandBase):
             card.due_date = None
             deck.cards.append(card)
             if prepend:
-                max_active_card_num = session \
+                max_active_card_num = (
+                    session
                     .query(sa.func.max(db.Card.num)) \
                     .filter(db.Card.deck_id == deck.id) \
                     .filter(db.Card.is_active == 1) \
-                    .scalar()
+                    .scalar()) or 0
                 session \
                     .query(db.Card) \
                     .filter(db.Card.deck_id == deck.id) \

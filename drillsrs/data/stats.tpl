@@ -70,7 +70,7 @@
 
                 <div>
                     <dt>Percent active</dt>
-                    <dd>{{ (active_card_count * 100.0 / (active_card_count + inactive_card_count))|round(2) }}%</dd>
+                    <dd>{{ percent(active_card_count, active_card_count + inactive_card_count) }}%</dd>
                 </div>
             </dl>
         </div>
@@ -95,7 +95,7 @@
 
                 <div>
                     <dt>Percent correct</dt>
-                    <dd>{{ (correct_answer_count * 100.0 / (correct_answer_count + incorrect_answer_count))|round(2) }}%</dd>
+                    <dd>{{ percent(correct_answer_count, correct_answer_count + incorrect_answer_count) }}%</dd>
                 </div>
             </dl>
         </div>
@@ -111,7 +111,7 @@
             <ul>
                 {% for card in bad_cards %}
                     <li>
-                        {{ card.question }} ({{ card.tags|join(', ') }}) - {{ (card.correct_answer_count * 100.0 / card.total_answer_count)|round(2) }}%
+                        {{ card.question }} ({{ card.tags|join(', ') }}) - {{ percent(card.correct_answer_count, card.total_answer_count) }}%
                     </li>
                 {% endfor %}
             </ul>

@@ -139,7 +139,8 @@ def get_card_by_num(session: Any, deck: Deck, num: int) -> Card:
 
 
 def get_max_card_num(session: Any, deck: Deck) -> int:
-    return session \
-        .query(sa.func.max(Card.num)) \
-        .filter(Card.deck_id == deck.id) \
-        .scalar()
+    return (
+        session
+        .query(sa.func.max(Card.num))
+        .filter(Card.deck_id == deck.id)
+        .scalar()) or 0
