@@ -25,6 +25,7 @@ def _import(handle: IO[Any]) -> None:
             for tag_obj in deck_obj['tags']:
                 tag = db.Tag()
                 tag.name = tag_obj['name']
+                tag.color = tag_obj['color']
                 deck.tags.append(tag)
                 tag_dict[tag.name] = tag
 

@@ -13,6 +13,7 @@ def _print_single_tag(session: Any, index: int, tag: db.Tag) -> None:
         .scalar()) or 0
     print('Tag #%d' % (index + 1))
     print('Name:    %s' % tag.name)
+    print('Color:   %s' % tag.color)
     print('Preview: [%s]' % util.format_card_tag(tag))
     print('Usages:  %d' % tag_usages)
     print()

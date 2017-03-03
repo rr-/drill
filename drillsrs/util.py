@@ -8,9 +8,16 @@ from drillsrs import db
 COLOR_SUCCESS = '\x1B[38;5;0m\x1B[48;5;193m'
 COLOR_FAIL = '\x1B[38;5;0m\x1B[48;5;217m'
 COLOR_RESET = '\x1B[0m'
-COLOR_TAGS = [
-    '\x1B[38;5;0m\x1B[48;5;%dm' % num
-    for num in [0xE6, 0xC2, 0xC3, 0xBD, 0xE1, 0xE0]]
+COLOR_XTERM_TEMPLATE = '\x1B[38;5;0m\x1B[48;5;%dm'
+COLOR_TAGS = {
+    'yellow': COLOR_XTERM_TEMPLATE % 0xE6,
+    'green': COLOR_XTERM_TEMPLATE % 0xC2,
+    'aqua': COLOR_XTERM_TEMPLATE % 0xC3,
+    'blue': COLOR_XTERM_TEMPLATE % 0xBD,
+    'pink': COLOR_XTERM_TEMPLATE % 0xE1,
+    'red': COLOR_XTERM_TEMPLATE % 0xE0,
+    'grey': COLOR_XTERM_TEMPLATE % 0xFE,
+}
 
 
 def format_timedelta(delta: timedelta) -> str:
@@ -57,12 +64,8 @@ def color(text: str, color_str: str) -> str:
     return color_str + text + COLOR_RESET
 
 
-def get_tag_color(tag: str) -> int:
-    return sum(ord(c) for c in tag) % len(COLOR_TAGS)
-
-
 def format_card_tag(tag: db.Tag) -> str:
-    return color(tag.name, COLOR_TAGS[get_tag_color(tag.name)])
+    return color(tag.name, COLOR_TAGS.get(tag.color, COLOR_TAGS['grey']))
 
 
 def format_card_tags(tags: List[db.Tag]) -> str:

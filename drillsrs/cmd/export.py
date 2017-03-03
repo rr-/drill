@@ -32,6 +32,7 @@ def _export(handle: IO[Any]) -> None:
                 'tags':
                 [{
                     'name': tag.name,
+                    'color': tag.color,
                 } for tag in deck.tags],
                 'cards':
                 [{

@@ -69,6 +69,7 @@ class Tag(Base):
         'deck_id', sa.Integer, sa.ForeignKey('deck.id'),
         nullable=False, index=True)
     name: str = sa.Column('name', sa.String, nullable=False)
+    color: str = sa.Column('color', sa.String, nullable=False)
 
 
 class Card(Base):
