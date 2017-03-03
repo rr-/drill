@@ -2,6 +2,7 @@ import os
 import readline
 from datetime import timedelta
 from typing import List
+from drillsrs import db
 
 
 COLOR_SUCCESS = '\x1B[38;5;0m\x1B[48;5;193m'
@@ -60,12 +61,12 @@ def get_tag_color(tag: str) -> int:
     return sum(ord(c) for c in tag) % len(COLOR_TAGS)
 
 
-def format_card_tags(tags: List[str]) -> str:
-    ret = []
-    for tag in tags:
-        tag_num = get_tag_color(tag)
-        ret.append(color(tag, COLOR_TAGS[tag_num]))
-    return ', '.join(ret)
+def format_card_tag(tag: db.Tag) -> str:
+    return color(tag.name, COLOR_TAGS[get_tag_color(tag.name)])
+
+
+def format_card_tags(tags: List[db.Tag]) -> str:
+    return ', '.join(format_card_tag(tag) for tag in tags)
 
 
 def get_data(file_name: str) -> bytes:

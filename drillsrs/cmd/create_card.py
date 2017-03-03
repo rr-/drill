@@ -43,16 +43,18 @@ class CreateCardCommand(CommandBase):
             card.num = max_card_num + 1
             card.question = question
             card.answers = answers
-            card.tags = tags
+            card.tags = [
+                db.get_tag_by_name(session, deck, tag)
+                for tag in tags]
             card.is_active = False
             card.due_date = None
             deck.cards.append(card)
             if prepend:
                 max_active_card_num = (
                     session
-                    .query(sa.func.max(db.Card.num)) \
-                    .filter(db.Card.deck_id == deck.id) \
-                    .filter(db.Card.is_active == 1) \
+                    .query(sa.func.max(db.Card.num))
+                    .filter(db.Card.deck_id == deck.id)
+                    .filter(db.Card.is_active == 1)
                     .scalar()) or 0
                 session \
                     .query(db.Card) \

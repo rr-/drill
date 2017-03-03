@@ -10,7 +10,9 @@ from drillsrs import db, scheduler
 def _import(handle: IO[Any]) -> None:
     with db.session_scope() as session:
         session.query(db.Deck).delete()
+        session.query(db.CardTag).delete()
         session.query(db.Card).delete()
+        session.query(db.Tag).delete()
         session.query(db.UserAnswer).delete()
         session.flush()
 
@@ -18,13 +20,21 @@ def _import(handle: IO[Any]) -> None:
             deck = db.Deck()
             deck.name = deck_obj['name']
             deck.description = deck_obj['description']
+
+            tag_dict = {}
+            for tag_obj in deck_obj['tags']:
+                tag = db.Tag()
+                tag.name = tag_obj['name']
+                deck.tags.append(tag)
+                tag_dict[tag.name] = tag
+
             for card_obj in deck_obj['cards']:
                 card = db.Card()
                 card.num = card_obj['id']
                 card.question = card_obj['question']
                 card.answers = card_obj['answers']
                 card.is_active = card_obj['active']
-                card.tags = card_obj.get('tags', [])
+                card.tags = [tag_dict[name] for name in card_obj['tags']]
                 for user_answer_obj in card_obj['user_answers']:
                     user_answer = db.UserAnswer()
                     user_answer.date = parse_date(user_answer_obj['date'])

@@ -42,6 +42,35 @@ class UserAnswer(Base):
     is_correct: bool = sa.Column('is_correct', sa.Boolean, nullable=False)
 
 
+class CardTag(Base):
+    __tablename__ = 'card_tag'
+
+    card_id = sa.Column(
+        'card_id',
+        sa.Integer,
+        sa.ForeignKey('card.id'),
+        primary_key=True,
+        nullable=False,
+        index=True)
+    tag_id = sa.Column(
+        'tag_id',
+        sa.Integer,
+        sa.ForeignKey('tag.id'),
+        primary_key=True,
+        nullable=False,
+        index=True)
+
+
+class Tag(Base):
+    __tablename__ = 'tag'
+
+    id: int = sa.Column('id', sa.Integer, primary_key=True)
+    deck_id: int = sa.Column(
+        'deck_id', sa.Integer, sa.ForeignKey('deck.id'),
+        nullable=False, index=True)
+    name: str = sa.Column('name', sa.String, nullable=False)
+
+
 class Card(Base):
     __tablename__ = 'card'
 
@@ -56,9 +85,7 @@ class Card(Base):
         nullable=False)
     is_active: bool = sa.Column('active', sa.Boolean, nullable=False)
     user_answers = sa.orm.relationship(UserAnswer, cascade='all, delete')
-    tags: List[str] = sa.Column(
-        'tags', sa.ext.mutable.MutableList.as_mutable(sa.PickleType),
-        nullable=False)
+    tags = sa.orm.relationship('Tag', backref='cards', secondary='card_tag')
     due_date: Optional[datetime] = sa.Column(
         'due_date', sa.DateTime, nullable=True)
 
@@ -94,6 +121,7 @@ class Deck(Base):
 
     id: int = sa.Column('id', sa.Integer, primary_key=True)
     cards: List[Card] = sa.orm.relationship(Card, cascade='all, delete')
+    tags: List[Tag] = sa.orm.relationship(Tag, cascade='all, delete')
     name: str = sa.Column('name', sa.String, nullable=False)
     description: Optional[str] = sa.Column(
         'description', sa.String, nullable=True)
@@ -144,3 +172,19 @@ def get_max_card_num(session: Any, deck: Deck) -> int:
         .query(sa.func.max(Card.num))
         .filter(Card.deck_id == deck.id)
         .scalar()) or 0
+
+
+def try_get_tag_by_name(session: Any, deck: Deck, name: str) -> Optional[Tag]:
+    return (
+        session
+        .query(Tag)
+        .filter(Tag.deck_id == deck.id)
+        .filter(Tag.name == name)
+        .one_or_none())
+
+
+def get_tag_by_name(session: Any, deck: Deck, name: str) -> Tag:
+    card = try_get_tag_by_name(session, deck, name)
+    if card:
+        return card
+    raise error.TagNotFoundError('A tag with name %r doesn\'t exist' % name)

@@ -45,7 +45,9 @@ class UpdateCardCommand(CommandBase):
                 card.answers = answers
 
             if tags is not None:
-                card.tags = tags
+                card.tags = [
+                    db.get_tag_by_name(session, deck, tag)
+                    for tag in tags]
 
             if new_num is not None:
                 if new_num > num:

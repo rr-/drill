@@ -84,7 +84,7 @@ class ListCardsCommand(CommandBase):
                 cards = [
                     card
                     for card in cards
-                    if tag.lower() in [t.lower() for t in card.tags]]
+                    if tag.lower() in [t.name.lower() for t in card.tags]]
 
             if not cards:
                 print('The deck is empty.')

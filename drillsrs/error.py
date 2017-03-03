@@ -2,6 +2,10 @@ class DrillError(RuntimeError):
     pass
 
 
+class TagNotFoundError(DrillError):
+    pass
+
+
 class CardNotFoundError(DrillError):
     pass
 

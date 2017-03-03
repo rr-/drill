@@ -22,20 +22,24 @@ def _export(handle: IO[Any]) -> None:
             .query(db.Deck)
             .options(
                 sa.orm
-                    .joinedload(db.Deck.cards)
-                    .subqueryload(db.Card.user_answers)))
+                .joinedload(db.Deck.cards)
+                .subqueryload(db.Card.user_answers)))
 
         json.dump(
             [{
                 'name': deck.name,
                 'description': deck.description,
+                'tags':
+                [{
+                    'name': tag.name,
+                } for tag in deck.tags],
                 'cards':
                 [{
                     'id': card.num,
                     'question': card.question,
                     'answers': card.answers,
                     'active': card.is_active,
-                    'tags': card.tags,
+                    'tags': [tag.name for tag in card.tags],
                     'user_answers':
                     [{
                         'date': answer.date,
