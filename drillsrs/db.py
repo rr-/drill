@@ -85,6 +85,8 @@ class Card(Base):
         'answers', sa.ext.mutable.MutableList.as_mutable(sa.PickleType),
         nullable=False)
     is_active: bool = sa.Column('active', sa.Boolean, nullable=False)
+    activation_date: datetime = sa.Column(
+        'activation_date', sa.DateTime, nullable=True, index=True)
     user_answers = sa.orm.relationship(UserAnswer, cascade='all, delete')
     tags = sa.orm.relationship('Tag', backref='cards', secondary='card_tag')
     due_date: Optional[datetime] = sa.Column(

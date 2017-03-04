@@ -61,6 +61,18 @@ class ExportCommand(CommandBase):
 
         with db.session_scope() as session:
             deck = db.get_deck_by_name(session, deck_name)
+            deck = (
+                session
+                .query(db.Deck)
+                .filter(db.Deck.id == deck.id)
+                .options(
+                    sa.orm
+                    .subqueryload(db.Deck.cards)
+                    .subqueryload(db.Card.tags),
+                    sa.orm
+                    .subqueryload(db.Deck.cards)
+                    .subqueryload(db.Card.user_answers))
+                .one())
 
             if path:
                 with open(path, 'w') as handle:

@@ -43,6 +43,9 @@ def _import(handle: IO[Any]) -> None:
                 user_answer.date = parse_date(user_answer_obj['date'])
                 user_answer.is_correct = user_answer_obj['correct']
                 card.user_answers.append(user_answer)
+            if card.user_answers:
+                card.activation_date = sorted(
+                    card.user_answers, key=lambda ua: ua.date)[0].date
             card.due_date = scheduler.next_due_date(card)
             deck.cards.append(card)
         session.add(deck)

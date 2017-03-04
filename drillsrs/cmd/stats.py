@@ -109,8 +109,8 @@ def _get_activity_histogram(session: Any, deck: db.Deck) -> List[int]:
         ret.append(
             session
             .query(sa.func.count(db.Card.id))
-            .filter(db.Card.first_answer_date < date)
             .filter(db.Deck.id == deck.id)
+            .filter(db.Card.activation_date < date)
             .scalar())
     return ret
 
