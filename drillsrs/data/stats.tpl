@@ -17,6 +17,13 @@
         #main-chart-section svg { width: 100%; height: 10em; }
         #card-stats, #answer-stats { width: 50%; display: inline-block; float: left; }
         #bad-cards ul { list-style-position: inside; margin: 0; padding: 0; text-align: left; }
+        .tag-grey { background: #DDD; }
+        .tag-blue { background: #DDF; }
+        .tag-green { background: #DFD; }
+        .tag-red { background: #FDD; }
+        .tag-aqua { background: #DFF; }
+        .tag-pink { background: #FDF; }
+        .tag-yellow { background: #FFB; }
     </style>
 </head>
 <body>
@@ -111,7 +118,7 @@
             <ul>
                 {% for card in bad_cards %}
                     <li>
-                        {{ card.question }} ({{ card.tags|map(attribute='name')|join(', ') }}) - {{ percent(card.correct_answer_count, card.total_answer_count) }}%
+                        {{ card.question }} ({{ tags(card.tags) }}) - {{ percent(card.correct_answer_count, card.total_answer_count) }}%
                     </li>
                 {% endfor %}
             </ul>

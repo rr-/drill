@@ -16,6 +16,12 @@ def _percent(count: Union[int, float], max_count: Union[int, float]) -> str:
     return '%.02f' % fraction
 
 
+def _format_tags(tags: List[db.Tag]) -> str:
+    return ', '.join(
+        '<span class="tag-%s">%s</span>' % (tag.color, tag.name)
+        for tag in tags)
+
+
 class AnswerHistogram(list):
     @property
     def length(self):
@@ -158,6 +164,7 @@ def _get_bad_cards(
 def _write_report(deck: db.Deck, session: Any, output_handle: Any) -> None:
     template = jinja2.Template(util.get_data('stats.tpl'))
     template.globals['percent'] = _percent
+    template.globals['tags'] = _format_tags
 
     activity_histogram = _get_activity_histogram(session, deck)
     answer_histogram = _get_answer_histogram(session, deck)

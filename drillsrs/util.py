@@ -10,13 +10,13 @@ COLOR_FAIL = '\x1B[38;5;0m\x1B[48;5;217m'
 COLOR_RESET = '\x1B[0m'
 COLOR_XTERM_TEMPLATE = '\x1B[38;5;0m\x1B[48;5;%dm'
 COLOR_TAGS = {
-    'yellow': COLOR_XTERM_TEMPLATE % 0xE6,
-    'green': COLOR_XTERM_TEMPLATE % 0xC2,
-    'aqua': COLOR_XTERM_TEMPLATE % 0xC3,
-    'blue': COLOR_XTERM_TEMPLATE % 0xBD,
-    'pink': COLOR_XTERM_TEMPLATE % 0xE1,
-    'red': COLOR_XTERM_TEMPLATE % 0xE0,
     'grey': COLOR_XTERM_TEMPLATE % 0xFE,
+    'blue': COLOR_XTERM_TEMPLATE % 0xBD,
+    'green': COLOR_XTERM_TEMPLATE % 0xC2,
+    'red': COLOR_XTERM_TEMPLATE % 0xE0,
+    'aqua': COLOR_XTERM_TEMPLATE % 0xC3,
+    'pink': COLOR_XTERM_TEMPLATE % 0xE1,
+    'yellow': COLOR_XTERM_TEMPLATE % 0xE6,
 }
 
 
