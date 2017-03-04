@@ -59,6 +59,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    db.init()
     args = parse_args()
     try:
         for command in get_all_commands():
@@ -78,5 +79,4 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    db.init()
     main()
