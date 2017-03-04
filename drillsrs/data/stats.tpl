@@ -111,7 +111,7 @@
             <ul>
                 {% for card in bad_cards %}
                     <li>
-                        {{ card.question }} ({{ card.tags|join(', ') }}) - {{ percent(card.correct_answer_count, card.total_answer_count) }}%
+                        {{ card.question }} ({{ card.tags|map(attribute='name')|join(', ') }}) - {{ percent(card.correct_answer_count, card.total_answer_count) }}%
                     </li>
                 {% endfor %}
             </ul>
