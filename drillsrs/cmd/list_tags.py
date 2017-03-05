@@ -38,7 +38,7 @@ class ListTagsCommand(CommandBase):
                 .all())
 
             if not tags:
-                print('The deck has no tags.')
+                print('No tags to show.')
                 return
 
             for i, tag in enumerate(tags):

@@ -11,7 +11,7 @@ class ListDecksCommand(CommandBase):
     def run(self, _args: argparse.Namespace) -> None:
         with db.session_scope() as session:
             if not session.query(db.Deck).count():
-                print('No decks.')
+                print('No decks to show.')
                 return
 
             results = session.query(
