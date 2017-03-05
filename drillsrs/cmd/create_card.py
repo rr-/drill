@@ -50,15 +50,5 @@ class CreateCardCommand(CommandBase):
             card.due_date = None
             deck.cards.append(card)
             if prepend:
-                max_active_card_num = (
-                    session
-                    .query(sa.func.max(db.Card.num))
-                    .filter(db.Card.deck_id == deck.id)
-                    .filter(db.Card.is_active == 1)
-                    .scalar()) or 0
-                session \
-                    .query(db.Card) \
-                    .filter(db.Card.deck_id == deck.id) \
-                    .filter(db.Card.is_active == 0) \
-                    .update({'num': db.Card.num + 1})
-                card.num = max_active_card_num + 1
+                max_active_card_num = db.get_max_active_card_num(session, deck)
+                db.move_card(session, card, max_active_card_num + 1)

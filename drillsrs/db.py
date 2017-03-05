@@ -123,7 +123,8 @@ class Deck(Base):
     __tablename__ = 'deck'
 
     id: int = sa.Column('id', sa.Integer, primary_key=True)
-    cards: List[Card] = sa.orm.relationship(Card, cascade='all, delete')
+    cards: List[Card] = sa.orm.relationship(
+        Card, cascade='all, delete', backref='deck')
     tags: List[Tag] = sa.orm.relationship(Tag, cascade='all, delete')
     name: str = sa.Column('name', sa.String, nullable=False)
     description: Optional[str] = sa.Column(
@@ -175,6 +176,40 @@ def get_max_card_num(session: Any, deck: Deck) -> int:
         .query(sa.func.max(Card.num))
         .filter(Card.deck_id == deck.id)
         .scalar()) or 0
+
+
+def get_max_active_card_num(session: Any, deck: Deck) -> int:
+    return (
+        session
+        .query(sa.func.max(Card.num))
+        .filter(Card.deck_id == deck.id)
+        .filter(Card.is_active == 1)
+        .scalar()) or 0
+
+
+def move_card(session: Any, card: Card, new_num: int) -> Card:
+    if card.num is not None:
+        if new_num > card.num:
+            session \
+                .query(Card) \
+                .filter(Card.deck_id == card.deck.id) \
+                .filter(Card.num > card.num) \
+                .filter(Card.num <= new_num) \
+                .update({'num': Card.num - 1})
+        else:
+            session \
+                .query(Card) \
+                .filter(Card.deck_id == card.deck.id) \
+                .filter(Card.num >= new_num) \
+                .filter(Card.num < card.num) \
+                .update({'num': Card.num + 1})
+    else:
+        session \
+            .query(Card) \
+            .filter(Card.deck_id == card.deck.id) \
+            .filter(Card.num >= new_num) \
+            .update({'num': Card.num + 1})
+    card.num = new_num
 
 
 def try_get_tag_by_name(session: Any, deck: Deck, name: str) -> Optional[Tag]:

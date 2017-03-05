@@ -2,11 +2,11 @@
 import sys
 import argparse
 import errno
-from drillsrs import db, error
-from drillsrs.cmd import get_all_commands
+from typing import List
+from drillsrs import cmd, db, error
 
 
-class CustomFormatter(argparse.HelpFormatter):
+class CustomHelpFormatter(argparse.HelpFormatter):
     def __init__(self, prog):
         super().__init__(prog, max_help_position=40, width=80)
 
@@ -36,21 +36,26 @@ class CustomFormatter(argparse.HelpFormatter):
         return fmt
 
 
-def parse_args() -> argparse.Namespace:
-    description = 'Spaced repetition flashcard program for learning anything.'
-
+def create_arg_parser(
+        commands: List[cmd.CommandBase],
+        description: str) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description=description, formatter_class=CustomFormatter)
+        description=description, formatter_class=CustomHelpFormatter)
     subparsers = parser.add_subparsers(dest='command')
 
-    for command in get_all_commands():
+    for command in commands:
         subparser = subparsers.add_parser(
             command.names[0],
             aliases=command.names[1:],
             help=command.description,
-            formatter_class=CustomFormatter)
+            formatter_class=CustomHelpFormatter)
+        subparser.set_defaults(command_cls=command)
         command.decorate_arg_parser(subparser)
 
+    return parser
+
+
+def parse_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     args = parser.parse_args()
     if not args.command:
         parser.print_usage()
@@ -58,16 +63,10 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def main() -> None:
-    db.init()
-    args = parse_args()
+def execute_command_with_args(
+        command: cmd.CommandBase, args: argparse.Namespace) -> None:
     try:
-        for command in get_all_commands():
-            if args.command in command.names:
-                command.run(args)
-                break
-        else:
-            assert False, 'Bad command'
+        command.run(args)
     except IOError as ex:
         if ex.errno != errno.EPIPE:
             raise
@@ -76,6 +75,16 @@ def main() -> None:
         print('Interrupted.')
     except error.DrillError as ex:
         print(ex)
+
+
+def main() -> None:
+    db.init()
+    commands = cmd.get_all_commands()
+    parser = create_arg_parser(
+        commands,
+        'Spaced repetition flashcard program for learning anything.')
+    args = parse_args(parser)
+    execute_command_with_args(args.command_cls, args)
 
 
 if __name__ == '__main__':
