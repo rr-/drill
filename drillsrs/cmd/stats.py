@@ -172,6 +172,7 @@ def _write_report(deck: db.Deck, session: Any, output_handle: Any) -> None:
 
     text = template.render(
         deck=deck,
+        date=datetime.now(),
         answer_histogram=answer_histogram,
         activity_histogram=activity_histogram,
         activity_histogram_max=max(*activity_histogram, 1),

@@ -124,6 +124,8 @@
             </ul>
         {% endif %}
     </section>
+
+    <p><small>Generated at {{ date.strftime('%Y-%m-%d %H:%M:%S') }}</small></p>
 </main>
 </body>
 </html>
