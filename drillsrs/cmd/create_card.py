@@ -32,7 +32,7 @@ class CreateCardCommand(CommandBase):
         deck_name: str = args.deck
         question: str = args.question
         answers: List[str] = args.answer
-        tags: List[str] = args.tag
+        tags: List[str] = args.tag or []
         prepend: bool = args.place == PREPEND
 
         with db.session_scope() as session:
