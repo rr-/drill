@@ -56,3 +56,11 @@ A: I like anki, but there's no CLI version I could use remotely, so I decided
 A: These are cool, but I wanted `drill` to stay simple. Additionally, the
 system used by `drill` is very similar to the one used by
 [wanikani.com](//wanikani.com), which I hold in very high regard.
+
+**Q: Why `drill-srs` rather than just `drill`?**  
+A: There's already `drill` package on Python Package Index and then there's
+`drill`, the DNS lookup tool. I chose the name `drill` before considering
+making the repository public and that name has sticked with me ever since, so
+after I decided to publish the program, rather than changing it to something
+completely different I added `-srs` suffix (that stands for [spaced repetition
+software](https://en.wikipedia.org/wiki/Spaced_repetition#Software)).
