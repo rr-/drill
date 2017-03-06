@@ -14,6 +14,16 @@ A CLI program for learning things through [spaced repetition](https://en.wikiped
 ![screenshot](https://cloud.githubusercontent.com/assets/1045476/23531471/d7989110-ffa6-11e6-9dad-b9b8201bc07e.png)
 
 
+### Installation
+
+In the console run:
+
+```
+pip install drillsrs
+```
+
+Then run `drill-srs` to see the available commands.
+
 ### How to use
 
 Flashcards are organized in decks, so that you can study multiple subjects at
