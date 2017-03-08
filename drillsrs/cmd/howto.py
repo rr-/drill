@@ -12,7 +12,7 @@ class HowToCommand(CommandBase):
     def run(self, _args: argparse.Namespace) -> None:
         text = util.get_data('howto.txt')
 
-        width, height = shutil.get_terminal_size((80, 20))
+        width, _height = shutil.get_terminal_size((80, 20))
 
         body = '\n'.join([
             '\n'.join(

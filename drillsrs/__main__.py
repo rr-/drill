@@ -15,9 +15,10 @@ class CustomHelpFormatter(argparse.HelpFormatter):
             return ''
         if not action.option_strings or action.nargs == 0:
             return super()._format_action_invocation(action)
-        default = self._get_default_metavar_for_optional(action)
-        args_string = self._format_args(action, default)
-        return ', '.join(action.option_strings) + ' ' + args_string
+        return '%s %s' % (
+            ', '.join(action.option_strings),
+            self._format_args(
+                action, self._get_default_metavar_for_optional(action)))
 
     def _metavar_formatter(self, action, default_metavar):
         if action.metavar is not None:
