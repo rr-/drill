@@ -31,6 +31,7 @@ def _export(deck: db.Deck, handle: IO[Any]) -> None:
                 'question': card.question,
                 'answers': card.answers,
                 'active': card.is_active,
+                'activation_date': card.activation_date,
                 'tags': [tag.name for tag in card.tags],
                 'user_answers':
                 [{

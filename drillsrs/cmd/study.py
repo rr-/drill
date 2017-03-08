@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime
 from drillsrs.cmd.command_base import CommandBase
 from drillsrs import db, scheduler, util
 
@@ -46,3 +47,4 @@ class StudyCommand(CommandBase):
                 util.ask('')
                 card.is_active = True
                 card.due_date = scheduler.next_due_date(card)
+                card.activation_date = datetime.now()
