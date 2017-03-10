@@ -7,7 +7,7 @@ from drillsrs import db, scheduler, util
 
 
 def _review_single_card(
-        index: int, cards_to_review: List[db.Card], card: db.Card) -> None:
+        index: int, cards_to_review: List[db.Card], card: db.Card) -> bool:
     print(
         'Card #%d (%d/%d, %d left)' % (
             card.num,
@@ -60,6 +60,7 @@ def _review_single_card(
     user_answer.is_correct = is_correct
     card.user_answers.append(user_answer)
     card.due_date = scheduler.next_due_date(card)
+    return is_correct
 
 
 def _review(session: Any, deck: db.Deck) -> None:
@@ -86,8 +87,17 @@ def _review(session: Any, deck: db.Deck) -> None:
             print('%d cards to review.' % len(cards_to_review))
             print()
 
-        for i, card in enumerate(cards_to_review):
-            _review_single_card(i, cards_to_review, card)
+        index = 0
+        while index < len(cards_to_review):
+            card = cards_to_review[index]
+            is_correct = _review_single_card(index, cards_to_review, card)
+            index += 1
+            if not is_correct:
+                cards_to_review.insert(
+                    random.randint(
+                        index + ((len(cards_to_review) - index) // 2),
+                        len(cards_to_review)),
+                    card)
             session.commit()
 
         first_iteration = False
