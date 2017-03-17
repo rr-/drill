@@ -2,9 +2,9 @@
 <html>
 <head>
     <title>drill report</title>
-    <style type="text/css">
-        body { font-family: sans-serif; text-align: center; font-size: 10pt; line-height: 20pt; }
-        main { max-width: 40em; margin: 0 auto; }
+    <style type='text/css'>
+        body { font-family: sans-serif; text-align: center; font-size: 10pt; line-height: 20pt; color: #333; }
+        main { max-width: 50em; margin: 0 auto; }
         h1, h2 { font-weight: normal; }
         h1 { font-size: 18pt; }
         h2 { font-size: 14pt; }
@@ -13,8 +13,7 @@
         dt { text-align: right; width: 50%; float: left; }
         dt:after { content: ':'; }
         dd { text-align: left; }
-        svg { border: 1px solid black; shape-rendering: crispEdges; }
-        #main-chart-section svg { width: 100%; height: 10em; }
+        svg { shape-rendering: crispEdges; }
         #card-stats, #answer-stats { width: 50%; display: inline-block; float: left; }
         #bad-cards ul { list-style-position: inside; margin: 0; padding: 0; text-align: left; }
         .tag-grey { background: #DDD; }
@@ -24,37 +23,28 @@
         .tag-aqua { background: #DFF; }
         .tag-pink { background: #FDF; }
         .tag-yellow { background: #FFB; }
+
+        table { width: 100%; border-spacing: 0; border-collapse: collapse; }
+        table th { background: #EEE; font-weight: normal; }
+        table td, table th { border: 1px solid #333; padding: 0.1em 0.5em; }
+
+        svg .main { fill: rgba(250, 220, 100, 0.5); stroke: orange; stroke-width: 1px; shape-rendering: geometricPrecision; }
+        svg .background { fill: #FAFAFA; }
+        svg .axis path { fill: none; stroke: grey; stroke-width: 1px; shape-rendering: crispEdges; }
+        svg .grid .tick line { stroke: #333; stroke-opacity: 0.1; shape-rendering: crispEdges; }
+        svg .correct_answer_count { fill: rgba(50, 180, 0, 0.8); shape-rendering: geometricPrecision; }
+        svg .incorrect_answer_count { fill: rgba(240, 20, 20, 0.8); shape-rendering: geometricPrecision; }
+
+        svg .day { fill: #FFF; stroke: rgba(0,0,0,0.1); }
+        svg .month { fill: none; stroke: #333; stroke-width: 1px; shape-rendering: crispEdges; }
     </style>
 </head>
 <body>
 <main>
-    <h1>Statistics for &bdquo;{{ deck.name }}&rdquo; deck</h1>
+    <script src='//d3js.org/d3.v4.min.js'></script>
+    <script src='//d3js.org/d3-scale-chromatic.v1.min.js'></script>
 
-    <section id='main-chart-section'>
-        <h2>Ratio of correct to incorrect answers</h2>
-        <svg id="ratio" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 {{ answer_histogram.length }} {{ answer_histogram.max_value }}" preserveAspectRatio="none">
-            {% set vars = {'x': 0} %}
-            {% for item in answer_histogram -%}
-                <rect x="{{ vars.x }}" width="{{ item.weight }}" y="{{ answer_histogram.max_value - item.correct_answer_count }}" height="{{ item.correct_answer_count }}" fill="darkseagreen"/>
-                <rect x="{{ vars.x }}" width="{{ item.weight }}" y="{{ answer_histogram.max_value - item.total_answer_count }}" height="{{ item.incorrect_answer_count }}" fill="red"/>
-                <rect x="{{ vars.x }}" width="{{ item.weight }}" y="0" height="{{ answer_histogram.max_value }}" fill="transparent">
-                    <title>{{ item.correct_answer_count }} correct answers, {{ item.incorrect_answer_count }} incorrect answers</title>
-                </rect>
-                {% if vars.update({'x': vars.x + item.weight}) %}{% endif %}
-            {%- endfor %}
-        </svg>
-
-        <h2>Active cards over time</h2>
-        <svg id="kot" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 {{ activity_histogram|length }} {{ activity_histogram_max }}" preserveAspectRatio="none">
-            {% for item in activity_histogram %}
-                <rect x="{{ loop.index - 1 }}" width="1" y="{{ activity_histogram_max - item }}" height="{{ activity_histogram_max }}" fill="darkseagreen"/>
-                <rect x="{{ loop.index - 1 }}" width="1" y="0" height="{{ activity_histogram_max }}" fill="transparent">
-                    <title>{{ activity_histogram|length - loop.index }} week(s) ago: {{ item }} items</title>
-                </rect>
-                <line x1="{{ loop.index - 1 }}" y1="0" x2="{{ loop.index - 1 }}" y2="{{ activity_histogram_max }}" stroke-width="1" vector-effect="non-scaling-stroke" stroke="rgba(0, 0, 0, 0.1)"/>
-            {% endfor %}
-        </svg>
-    </section>
+    <h1>Statistics for the &bdquo;{{ deck.name }}&rdquo; deck</h1>
 
     <section id='text-section'>
         <div id='card-stats'>
@@ -109,23 +99,268 @@
         <div style='clear:both'></div>
     </section>
 
+    <section id='learning-heatmap'>
+        <h2>Learning activity</h2>
+    </section>
+
+    <section id='reviews-history'>
+        <h2>Reviews over time</h2>
+    </section>
+
+    <section id='active-card-count-history'>
+        <h2>Active cards over time</h2>
+    </section>
+
     <section id='bad-cards'>
         <h2>Bad condition cards</h2>
-        {% if bad_cards.empty %}
-            <p>None!</p>
-        {% else %}
+        {% if bad_cards %}
             <p>List of cards guessed correctly less than {{ (bad_cards_threshold * 100.0)|round(2) }}% of the time.</p>
-            <ul>
-                {% for card in bad_cards %}
-                    <li>
-                        {{ card.question }} ({{ tags(card.tags) }}) - {{ percent(card.correct_answer_count, card.total_answer_count) }}%
-                    </li>
-                {% endfor %}
-            </ul>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Question</th>
+                        <th>Answers</th>
+                        <th>Tags</th>
+                        <th>Answers correct</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for card in bad_cards %}
+                        <tr>
+                            <td>{{ card.id }}</td>
+                            <td>{{ card.question }}</td>
+                            <td>{{ card.answers|join(', ') }}</td>
+                            <td>{{ tags(card.tags) }}</td>
+                            <td>
+                                {{ card.correct_answer_count }} / {{ card.total_answer_count }}
+                                ({{ percent(card.correct_answer_count, card.total_answer_count) }}%)
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>None!</p>
         {% endif %}
     </section>
 
     <p><small>Generated at {{ date.strftime('%Y-%m-%d %H:%M:%S') }}</small></p>
 </main>
+<script>
+const data = {{ tojson(learning_history) }};
+data.forEach(d => d.date = new Date(d.date));
+
+d3.formatDefaultLocale({
+    decimal: '.',
+    'thousands': '\u202F',
+    grouping: [3],
+});
+
+function drawGrid(svg, xScale, yScale, width, height)
+{
+    svg.append('g')
+        .attr('class', 'x grid')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(
+            d3.axisBottom()
+            .scale(xScale)
+            .tickFormat('')
+            .tickSize(-height)
+            .ticks(12));
+    svg.append('g')
+        .attr('class', 'y grid')
+        .call(
+            d3.axisLeft()
+            .scale(yScale)
+            .tickFormat('')
+            .tickSize(-width)
+            .ticks(5));
+}
+
+function drawAxes(svg, xScale, yScale, height)
+{
+    svg.append('g')
+        .attr('class', 'x axis')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(
+            d3.axisBottom()
+            .scale(xScale)
+            .tickFormat(d3.timeFormat('%b %Y')));
+    svg.append('g')
+        .attr('class', 'y axis')
+        .call(d3.axisLeft().scale(yScale));
+    svg.selectAll('.x.axis text')
+        .style('text-anchor', 'end')
+        .attr('dx', '-.8em')
+        .attr('dy', '.15em')
+        .attr('transform', 'rotate(-45)');
+}
+
+function drawActiveCardCountHistoryChart()
+{
+    const margin = {top: 0, right: 0, bottom: 50, left: 50};
+    const target = d3.select('#active-card-count-history');
+    const width = (
+        target.node().getBoundingClientRect().width
+        - margin.left
+        - margin.right);
+    const height = width / 3.0;
+
+    // scales
+    const xScale = d3.scaleTime()
+        .domain(d3.extent(data, d => d.date))
+        .range([0, width - width / data.length]);
+    const yScale = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.total_active_card_count)])
+        .range([height, 0]);
+
+    // main
+    const svg = target
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    // plot
+    svg.append('path')
+        .attr('class', 'main')
+        .datum(data)
+        .attr('d',
+            d3.area()
+            .x(d => xScale(d.date))
+            .y0(yScale(0))
+            .y1(d => yScale(d.total_active_card_count)));
+
+    drawGrid(svg, xScale, yScale, width, height);
+    drawAxes(svg, xScale, yScale, height);
+}
+
+function drawReviewsHistoryChart()
+{
+    const margin = {top: 0, right: 0, bottom: 50, left: 50};
+    const target = d3.select('#reviews-history');
+    const width = (
+        target.node().getBoundingClientRect().width
+        - margin.left
+        - margin.right);
+    const height = width / 3.0;
+
+    // scales
+    const xScale = d3.scaleTime()
+        .domain(d3.extent(data, d => d.date))
+        .range([0, width - width / data.length]);
+    const yScale = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.incorrect_answer_count + d.correct_answer_count)])
+        .range([height, 0]);
+
+    // main
+    const svg = target
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    const area = d3.area()
+        .x(d => xScale(d.data.date))
+        .y0(d => yScale(d[0]))
+        .y1(d => yScale(d[1]));
+    const stack = d3.stack()
+        .keys(['incorrect_answer_count', 'correct_answer_count']);
+
+    // plot
+    svg.selectAll('.day')
+        .data(stack(data))
+        .enter()
+        .append('path')
+        .attr('class', d => d.key)
+        .attr('d', area);
+
+    drawGrid(svg, xScale, yScale, width, height);
+    drawAxes(svg, xScale, yScale, height);
+}
+
+function drawStudyActivityHeatMap()
+{
+    const margin = {top: 2, right: 2, bottom: 2, left: 50};
+    const target = d3.select('#learning-heatmap');
+    const width = (
+        target.node().getBoundingClientRect().width
+        - margin.left
+        - margin.right);
+    const cellSize = width / 53;
+    const height = cellSize * 7;
+
+    const color = d3.scalePow()
+        .domain([0, 100])
+        .clamp(true)
+        .range(['#F5F5D5', '#4A0']);
+
+    const svg = target
+        .selectAll('svg')
+        .data(d3.set(data, d => d.date.getFullYear()).values().map(d => parseInt(d)))
+        .enter()
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('class', 'RdYlGn')
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    svg.append('text')
+        .attr('transform', 'translate(-12,' + cellSize * 3.5 + ')rotate(-90)')
+        .style('text-anchor', 'middle')
+        .text(d => d);
+
+    const rect = svg.selectAll('.day')
+        .data(d => d3.timeDays(new Date(d, 0, 1), new Date(d + 1, 0, 1)))
+        .enter().append('rect')
+        .attr('class', 'day')
+        .attr('width', cellSize)
+        .attr('height', cellSize)
+        .attr('x', d => d3.timeWeek.count(d3.timeYear(d), d) * cellSize)
+        .attr('y', d => d.getDay() * cellSize)
+        .datum(d3.timeFormat('%Y-%m-%d'));
+
+    rect.append('title')
+        .text(d => d);
+
+    svg.selectAll('.month')
+        .data(d => d3.timeMonths(new Date(d, 0, 1), new Date(d + 1, 0, 1)))
+        .enter().append('path')
+        .attr('class', 'month')
+        .attr('d', monthPath);
+
+    const nest = d3.nest()
+        .key(d => d.date.toISOString().substring(0, 10))
+        .rollup(d => d3.sum(d, d => d.new_active_card_count))
+        .map(data);
+
+    rect.filter(d => nest.has(d) || (new Date(d) < new Date()))
+        .attr('class', 'day')
+        .attr('style', d => 'fill: ' + color(nest.get(d) || 0))
+        .select('title')
+        .text(d => d + ': ' + (nest.get(d) || 0));
+
+    function monthPath(t0) {
+        const t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0);
+        const d0 = t0.getDay();
+        const w0 = d3.timeWeek.count(d3.timeYear(t0), t0)
+        const d1 = t1.getDay();
+        const w1 = d3.timeWeek.count(d3.timeYear(t1), t1);
+        return 'M' + (w0 + 1) * cellSize + ',' + d0 * cellSize
+            + 'H' + w0 * cellSize + 'V' + 7 * cellSize
+            + 'H' + w1 * cellSize + 'V' + (d1 + 1) * cellSize
+            + 'H' + (w1 + 1) * cellSize + 'V' + 0
+            + 'H' + (w0 + 1) * cellSize + 'Z';
+    }
+}
+
+drawReviewsHistoryChart();
+drawActiveCardCountHistoryChart();
+drawStudyActivityHeatMap();
+</script>
 </body>
 </html>
