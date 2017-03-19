@@ -148,8 +148,14 @@
     <p><small>Generated at {{ date.strftime('%Y-%m-%d %H:%M:%S') }}</small></p>
 </main>
 <script>
+function getDate(dateString)
+{
+    let [year, month, day] = dateString.split('-').map(x => parseInt(x));
+    return new Date(Date.UTC(year, month - 1, day));
+}
+
 const data = {{ tojson(learning_history) }};
-data.forEach(d => d.date = new Date(d.date));
+data.forEach(d => d.date = getDate(d.date));
 
 d3.formatDefaultLocale({
     decimal: '.',
@@ -315,20 +321,24 @@ function drawStudyActivityHeatMap()
         .text(d => d);
 
     const rect = svg.selectAll('.day')
-        .data(d => d3.timeDays(new Date(d, 0, 1), new Date(d + 1, 0, 1)))
+        .data(d => d3.utcDays(
+            new Date(Date.UTC(d, 0, 1)),
+            new Date(Date.UTC(d + 1, 0, 1))))
         .enter().append('rect')
         .attr('class', 'day')
         .attr('width', cellSize)
         .attr('height', cellSize)
-        .attr('x', d => d3.timeWeek.count(d3.timeYear(d), d) * cellSize)
-        .attr('y', d => d.getDay() * cellSize)
+        .attr('x', d => d3.utcMonday.count(d3.utcYear(d), d) * cellSize)
+        .attr('y', d => ((d.getDay() + 6) % 7) * cellSize)
         .datum(d3.timeFormat('%Y-%m-%d'));
 
     rect.append('title')
         .text(d => d);
 
     svg.selectAll('.month')
-        .data(d => d3.timeMonths(new Date(d, 0, 1), new Date(d + 1, 0, 1)))
+        .data(d => d3.utcMonths(
+            new Date(Date.UTC(d, 0, 1)),
+            new Date(Date.UTC(d + 1, 0, 1))))
         .enter().append('path')
         .attr('class', 'month')
         .attr('d', monthPath);
@@ -345,16 +355,20 @@ function drawStudyActivityHeatMap()
         .text(d => d + ': ' + (nest.get(d) || 0));
 
     function monthPath(t0) {
-        const t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0);
-        const d0 = t0.getDay();
-        const w0 = d3.timeWeek.count(d3.timeYear(t0), t0)
-        const d1 = t1.getDay();
-        const w1 = d3.timeWeek.count(d3.timeYear(t1), t1);
+        const t1 = new Date(Date.UTC(t0.getFullYear(), t0.getMonth() + 1, 0));
+        const d0 = (t0.getDay() + 6) % 7;
+        const w0 = d3.utcMonday.count(d3.utcYear(t0), t0)
+        const d1 = (t1.getDay() + 6) % 7;
+        const w1 = d3.utcMonday.count(d3.utcYear(t1), t1);
         return 'M' + (w0 + 1) * cellSize + ',' + d0 * cellSize
-            + 'H' + w0 * cellSize + 'V' + 7 * cellSize
-            + 'H' + w1 * cellSize + 'V' + (d1 + 1) * cellSize
-            + 'H' + (w1 + 1) * cellSize + 'V' + 0
-            + 'H' + (w0 + 1) * cellSize + 'Z';
+            + 'H' + w0 * cellSize
+            + 'V' + 7 * cellSize
+            + 'H' + w1 * cellSize
+            + 'V' + (d1 + 1) * cellSize
+            + 'H' + (w1 + 1) * cellSize
+            + 'V' + 0
+            + 'H' + (w0 + 1) * cellSize
+            + 'Z';
     }
 }
 
