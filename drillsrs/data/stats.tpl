@@ -205,7 +205,7 @@ function drawAxes(svg, xScale, yScale, height)
 
 function drawActiveCardCountHistoryChart()
 {
-    const margin = {top: 0, right: 0, bottom: 50, left: 50};
+    const margin = {top: 10, right: 10, bottom: 50, left: 50};
     const target = d3.select('#active-card-count-history');
     const width = (
         target.node().getBoundingClientRect().width
@@ -245,7 +245,7 @@ function drawActiveCardCountHistoryChart()
 
 function drawReviewsHistoryChart()
 {
-    const margin = {top: 0, right: 0, bottom: 50, left: 50};
+    const margin = {top: 10, right: 10, bottom: 50, left: 50};
     const target = d3.select('#reviews-history');
     const width = (
         target.node().getBoundingClientRect().width
@@ -290,7 +290,7 @@ function drawReviewsHistoryChart()
 
 function drawStudyActivityHeatMap()
 {
-    const margin = {top: 2, right: 2, bottom: 2, left: 50};
+    const margin = {top: 10, right: 10, bottom: 10, left: 50};
     const target = d3.select('#learning-heatmap');
     const width = (
         target.node().getBoundingClientRect().width
