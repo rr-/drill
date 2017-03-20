@@ -8,14 +8,14 @@ from drillsrs import db, scheduler, util
 
 def _review_single_card(
         index: int,
+        correct_answer_count: int,
         cards_to_review: List[db.Card],
         card: db.Card) -> db.UserAnswer:
-    print(
-        'Card #%d (%d/%d, %d left)' % (
-            card.num,
-            index + 1,
-            len(cards_to_review),
-            len(cards_to_review) - index))
+    print('Card #{} ({:.01%} done, {} left, {:.01%} correct)'.format(
+        card.num,
+        index / len(cards_to_review),
+        len(cards_to_review) - index,
+        correct_answer_count / max(1, index)))
 
     print('Question: %s' % card.question, end='')
     if card.tags:
@@ -88,13 +88,16 @@ def _review(session: Any, deck: db.Deck) -> None:
             print()
 
         index = 0
+        correct_answer_count = 0
         while index < len(cards_to_review):
             card = cards_to_review[index]
-            user_answer = _review_single_card(index, cards_to_review, card)
+            user_answer = _review_single_card(
+                index, correct_answer_count, cards_to_review, card)
             card.user_answers.append(user_answer)
             index += 1
             if user_answer.is_correct:
                 card.due_date = scheduler.next_due_date(card)
+                correct_answer_count += 1
             else:
                 cards_to_review.insert(
                     random.randint(
