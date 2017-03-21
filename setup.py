@@ -5,7 +5,7 @@ setup(
     author_email='rr-@sakuya.pl',
     name='drillsrs',
     long_description='Spaced repetition learning in CLI',
-    version='0.1',
+    version='0.2',
     url='https://github.com/rr-/drill',
     packages=find_packages(),
 
