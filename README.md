@@ -22,6 +22,14 @@ In the console run:
 pip install drillsrs
 ```
 
+...or, to install the latest version:
+
+```
+git clone https://github.com/rr-/drill
+cd drill
+pip install . --upgrade
+```
+
 Then run `drill-srs` to see the available commands.
 
 ### How to use
