@@ -1,16 +1,28 @@
 import argparse
 from datetime import datetime
+from typing import List
 from drillsrs.cmd.command_base import CommandBase
 from drillsrs import db, scheduler, util
 
 
-def _print_single_card(card: db.Card) -> None:
-    print('Card #%d' % card.num)
+def _learn_single_card(
+        index: int,
+        cards_to_study: List[db.Card],
+        card: db.Card) -> None:
+    print('Card #{} ({:.01%} done, {} left)'.format(
+        card.num,
+        index / len(cards_to_study),
+        len(cards_to_study) - index))
     print('Question: %s' % card.question, end='')
     if card.tags:
         print(' [%s]' % util.format_card_tags(card.tags), end='')
     print()
     print('Answers: %s' % ', '.join(card.answers))
+
+    util.ask('')
+    card.is_active = True
+    card.due_date = scheduler.next_due_date(card)
+    card.activation_date = datetime.now()
 
 
 class StudyCommand(CommandBase):
@@ -39,12 +51,8 @@ class StudyCommand(CommandBase):
 
             print(
                 '%d cards to study. After seeing a card, hit enter.' %
-                cards_to_study.count())
+                len(cards_to_study))
             print()
 
-            for card in cards_to_study:
-                _print_single_card(card)
-                util.ask('')
-                card.is_active = True
-                card.due_date = scheduler.next_due_date(card)
-                card.activation_date = datetime.now()
+            for index, card in enumerate(cards_to_study):
+                _learn_single_card(index, cards_to_study, card)

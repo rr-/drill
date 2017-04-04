@@ -40,7 +40,7 @@ def next_due_date(card: db.Card) -> Optional[datetime]:
 
 def get_cards_to_study(
         session: Any, deck: db.Deck, how_many: int) -> List[db.Card]:
-    return (
+    return list(
         session.query(db.Card)
         .filter(db.Card.deck_id == deck.id)
         .filter(db.Card.is_active == 0)
@@ -49,7 +49,7 @@ def get_cards_to_study(
 
 
 def get_due_cards(session: Any, deck: db.Deck) -> List[db.Card]:
-    return (
+    return list(
         session.query(db.Card)
         .filter(db.Card.deck_id == deck.id)
         .filter(db.Card.is_active)
