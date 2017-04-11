@@ -28,7 +28,8 @@
         table th { background: #EEE; font-weight: normal; }
         table td, table th { border: 1px solid #333; padding: 0.1em 0.5em; }
 
-        svg .main { fill: rgba(250, 220, 100, 0.5); stroke: orange; stroke-width: 1px; shape-rendering: geometricPrecision; }
+        svg .main-area { fill: rgba(250, 220, 100, 0.5); shape-rendering: geometricPrecision; }
+        svg .main-line { fill: none; stroke: orange; stroke-width: 1px; shape-rendering: geometricPrecision; }
         svg .background { fill: #FAFAFA; }
         svg .axis path { fill: none; stroke: grey; stroke-width: 1px; shape-rendering: crispEdges; }
         svg .grid .tick line { stroke: #333; stroke-opacity: 0.1; shape-rendering: crispEdges; }
@@ -231,13 +232,20 @@ function drawActiveCardCountHistoryChart()
 
     // plot
     svg.append('path')
-        .attr('class', 'main')
+        .attr('class', 'main-area')
         .datum(data)
         .attr('d',
             d3.area()
             .x(d => xScale(d.date))
             .y0(yScale(0))
-            .y1(d => yScale(d.total_active_card_count)));
+            .y1(d => 1 + yScale(d.total_active_card_count)));
+    svg.append('path')
+        .attr('class', 'main-line')
+        .datum(data)
+        .attr('d',
+            d3.line()
+            .x(d => xScale(d.date))
+            .y(d => 1 + yScale(d.total_active_card_count)));
 
     drawGrid(svg, xScale, yScale, width, height);
     drawAxes(svg, xScale, yScale, height);
@@ -271,8 +279,8 @@ function drawReviewsHistoryChart()
 
     const area = d3.area()
         .x(d => xScale(d.data.date))
-        .y0(d => yScale(d[0]))
-        .y1(d => yScale(d[1]));
+        .y0(d => 0.5 + yScale(d[0]))
+        .y1(d => 0.5 + yScale(d[1]));
     const stack = d3.stack()
         .keys(['incorrect_answer_count', 'correct_answer_count']);
 
