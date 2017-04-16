@@ -13,13 +13,13 @@ def _learn_single_card(
         card.num,
         index / len(cards_to_study),
         len(cards_to_study) - index))
-    print('Question: %s' % card.question, end='')
+    question = 'Question: %s' % card.question
     if card.tags:
-        print(' [%s]' % util.format_card_tags(card.tags), end='')
-    print()
-    print('Answers: %s' % ', '.join(card.answers))
+        question += ' [%s]' % util.format_card_tags(card.tags)
+    util.ask(question)
+    util.ask('Answers: %s' % ', '.join(card.answers))
+    print('')
 
-    util.ask('')
     card.is_active = True
     card.due_date = scheduler.next_due_date(card)
     card.activation_date = datetime.now()
