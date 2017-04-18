@@ -22,8 +22,6 @@ setup(
     ],
     package_dir={'drillsrs': 'drillsrs'},
     package_data={'drillsrs': ['data/*.*']},
-    include_package_data=True,
-    zip_safe=False,
 
     classifiers=[
         'Environment :: Console',
