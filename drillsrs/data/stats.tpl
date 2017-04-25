@@ -4,7 +4,7 @@
     <title>drill report</title>
     <style type='text/css'>
         body { font-family: sans-serif; text-align: center; font-size: 10pt; line-height: 20pt; color: #333; }
-        main { max-width: 50em; margin: 0 auto; }
+        main { max-width: 60em; margin: 0 auto; }
         h1, h2 { font-weight: normal; }
         h1 { font-size: 18pt; }
         h2 { font-size: 14pt; }
@@ -36,14 +36,17 @@
         svg .correct_answer_count { fill: rgba(50, 180, 0, 0.8); shape-rendering: geometricPrecision; }
         svg .incorrect_answer_count { fill: rgba(240, 20, 20, 0.8); shape-rendering: geometricPrecision; }
 
-        svg .day { fill: #FFF; stroke: rgba(0,0,0,0.1); }
         svg .month { fill: none; stroke: #333; stroke-width: 1px; shape-rendering: crispEdges; }
+        svg .week text { font-size: 4pt; font-family: sans-serif; fill: rgba(100,150,0,0.9); }
+        svg .day rect { fill: #FFF; stroke: rgba(0,0,0,0.1); }
+        svg .day text { font-size: 4pt; font-family: sans-serif; fill: rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 <main>
     <script src='//d3js.org/d3.v4.min.js'></script>
     <script src='//d3js.org/d3-scale-chromatic.v1.min.js'></script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/d3-transform/1.0.4/d3-transform.min.js'></script>
 
     <h1>Statistics for the &bdquo;{{ deck.name }}&rdquo; deck</h1>
 
@@ -164,6 +167,13 @@ d3.formatDefaultLocale({
     grouping: [3],
 });
 
+function addDays(datetime, howMuch)
+{
+    const ret = getDate(datetime);
+    ret.setTime(ret.getTime() + howMuch * 24 * 60 * 60 * 1000);
+    return d3.timeFormat('%Y-%m-%d')(ret);
+}
+
 function drawGrid(svg, xScale, yScale, width, height)
 {
     svg.append('g')
@@ -196,7 +206,8 @@ function drawAxes(svg, xScale, yScale, height)
             .tickFormat(d3.timeFormat('%b %Y')));
     svg.append('g')
         .attr('class', 'y axis')
-        .call(d3.axisLeft().scale(yScale));
+        .call(d3.axisLeft()
+        .scale(yScale));
     svg.selectAll('.x.axis text')
         .style('text-anchor', 'end')
         .attr('dx', '-.8em')
@@ -215,10 +226,12 @@ function drawActiveCardCountHistoryChart()
     const height = width / 3.0;
 
     // scales
-    const xScale = d3.scaleTime()
+    const xScale = d3
+        .scaleTime()
         .domain(d3.extent(data, d => d.date))
         .range([0, width - width / data.length]);
-    const yScale = d3.scaleLinear()
+    const yScale = d3
+        .scaleLinear()
         .domain([0, d3.max(data, d => d.total_active_card_count)])
         .range([height, 0]);
 
@@ -262,10 +275,12 @@ function drawReviewsHistoryChart()
     const height = width / 3.0;
 
     // scales
-    const xScale = d3.scaleTime()
+    const xScale = d3
+        .scaleTime()
         .domain(d3.extent(data, d => d.date))
         .range([0, width - width / data.length]);
-    const yScale = d3.scaleLinear()
+    const yScale = d3
+        .scaleLinear()
         .domain([0, d3.max(data, d => d.incorrect_answer_count + d.correct_answer_count)])
         .range([height, 0]);
 
@@ -277,11 +292,13 @@ function drawReviewsHistoryChart()
         .append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-    const area = d3.area()
+    const area = d3
+        .area()
         .x(d => xScale(d.data.date))
         .y0(d => 0.5 + yScale(d[0]))
         .y1(d => 0.5 + yScale(d[1]));
-    const stack = d3.stack()
+    const stack = d3
+        .stack()
         .keys(['incorrect_answer_count', 'correct_answer_count']);
 
     // plot
@@ -305,9 +322,10 @@ function drawStudyActivityHeatMap()
         - margin.left
         - margin.right);
     const cellSize = width / 53;
-    const height = cellSize * 7;
+    const height = cellSize * 7 + 2;
 
-    const color = d3.scalePow()
+    const color = d3
+        .scalePow()
         .domain([0, 100])
         .clamp(true)
         .range(['#F5F5D5', '#4A0']);
@@ -328,39 +346,90 @@ function drawStudyActivityHeatMap()
         .style('text-anchor', 'middle')
         .text(d => d);
 
-    const rect = svg.selectAll('.day')
+    const nest = d3
+        .nest()
+        .key(d => d.date.toISOString().substring(0, 10))
+        .rollup(d => d3.sum(d, d => d.new_active_card_count))
+        .map(data);
+
+    const day = svg
+        .selectAll('.day')
         .data(d => d3.utcDays(
             new Date(Date.UTC(d, 0, 1)),
             new Date(Date.UTC(d + 1, 0, 1))))
-        .enter().append('rect')
+        .enter()
+        .append('g')
         .attr('class', 'day')
+        .attr('transform', d3Transform().translate(d => [
+            d3.utcMonday.count(d3.utcYear(d), d) * cellSize,
+            ((d.getDay() + 6) % 7) * cellSize
+        ]));
+
+    const dayRect = day
+        .append('rect')
         .attr('width', cellSize)
         .attr('height', cellSize)
-        .attr('x', d => d3.utcMonday.count(d3.utcYear(d), d) * cellSize)
-        .attr('y', d => ((d.getDay() + 6) % 7) * cellSize)
         .datum(d3.timeFormat('%Y-%m-%d'));
 
-    rect.append('title')
+    dayRect
+        .append('title')
         .text(d => d);
+
+    dayRect.filter(d => nest.has(d) || (new Date(d) < new Date()))
+        .attr('style', d => 'fill: ' + color(nest.get(d) || 0))
+        .select('title')
+        .text(d => d + ': ' + (nest.get(d) || 0));
+
+    day
+        .append('text')
+        .attr('x', 0.5 * cellSize)
+        .attr('y', 0.5 * cellSize)
+        .attr('dominant-baseline', 'central')
+        .attr('text-anchor', 'middle')
+        .datum(d3.timeFormat('%Y-%m-%d'))
+        .text(d => nest.get(d) || '');
+
+    console.log(d3.utcWeeks(
+        new Date(Date.UTC(2017, 0, 1)),
+        new Date(Date.UTC(2018, 0, 1))));
+
+    const week = svg
+        .selectAll('.week')
+        .data(d => d3.utcWeeks(
+            new Date(Date.UTC(d, 0, 1)),
+            new Date(Date.UTC(d + 1, 0, 1))))
+        .enter()
+        .append('g')
+        .attr('class', 'week')
+        .attr('transform', d3Transform().translate(d => [
+            d3.utcMonday.count(d3.utcYear(d), d) * cellSize,
+            7 * cellSize,
+        ]));
+
+    week
+        .append('text')
+        .attr('x', 0.5 * cellSize)
+        .attr('y', 0.5 * cellSize)
+        .attr('dominant-baseline', 'central')
+        .attr('text-anchor', 'middle')
+        .datum(d3.timeFormat('%Y-%m-%d'))
+        .text(d => (
+            (nest.get(d) || 0) +
+            (nest.get(addDays(d, -1)) || 0) +
+            (nest.get(addDays(d, -2)) || 0) +
+            (nest.get(addDays(d, -3)) || 0) +
+            (nest.get(addDays(d, -4)) || 0) +
+            (nest.get(addDays(d, -5)) || 0) +
+            (nest.get(addDays(d, -6)) || 0)) || '-');
 
     svg.selectAll('.month')
         .data(d => d3.utcMonths(
             new Date(Date.UTC(d, 0, 1)),
             new Date(Date.UTC(d + 1, 0, 1))))
-        .enter().append('path')
+        .enter()
+        .append('path')
         .attr('class', 'month')
         .attr('d', monthPath);
-
-    const nest = d3.nest()
-        .key(d => d.date.toISOString().substring(0, 10))
-        .rollup(d => d3.sum(d, d => d.new_active_card_count))
-        .map(data);
-
-    rect.filter(d => nest.has(d) || (new Date(d) < new Date()))
-        .attr('class', 'day')
-        .attr('style', d => 'fill: ' + color(nest.get(d) || 0))
-        .select('title')
-        .text(d => d + ': ' + (nest.get(d) || 0));
 
     function monthPath(t0) {
         const t1 = new Date(Date.UTC(t0.getFullYear(), t0.getMonth() + 1, 0));
