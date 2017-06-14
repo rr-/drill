@@ -5,13 +5,15 @@ from drillsrs import db
 
 THRESHOLDS = [
     timedelta(seconds=0),
-    timedelta(hours=4),
+    timedelta(hours=1),
+    timedelta(hours=3),
     timedelta(hours=8),
     timedelta(days=1),
     timedelta(days=3),
     timedelta(days=7),
     timedelta(days=14),
     timedelta(days=30),
+    timedelta(days=60),
     timedelta(days=120),
 ]
 

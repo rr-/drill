@@ -49,14 +49,16 @@ This is how the score translates into the re-evaluation delay:
 Card score | Wait time
 ---------- | ---------
 0          | none (just after the study session)
-1          | 4 hours
-2          | 8 hours
-3          | 1 day
-4          | 3 days
-5          | 1 week
-6          | 2 weeks
-7          | 1 month
-8          | 4 months
+1          | 1 hour
+2          | 3 hours
+3          | 8 hours
+4          | 1 day
+5          | 3 days
+6          | 1 week
+7          | 2 weeks
+8          | 1 month
+9          | 2 months
+10         | 4 months
 
 For example, if you answered the given card correctly thrice (score 3) and now
 made a mistake (score is 2 now), this card will re-appear after 8 hours. The
