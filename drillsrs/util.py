@@ -5,18 +5,18 @@ from typing import List
 from drillsrs import db
 
 
-COLOR_SUCCESS = '\x1B[38;5;0m\x1B[48;5;193m'
-COLOR_FAIL = '\x1B[38;5;0m\x1B[48;5;217m'
+COLOR_SUCCESS = '\x1B[38;5;10m'
+COLOR_FAIL = '\x1B[38;5;9m'
 COLOR_RESET = '\x1B[0m'
-COLOR_XTERM_TEMPLATE = '\x1B[38;5;0m\x1B[48;5;%dm'
+COLOR_XTERM_TEMPLATE = '\x1B[38;5;%dm'
 COLOR_TAGS = {
-    'grey': COLOR_XTERM_TEMPLATE % 0xFE,
-    'blue': COLOR_XTERM_TEMPLATE % 0xBD,
-    'green': COLOR_XTERM_TEMPLATE % 0xC2,
-    'red': COLOR_XTERM_TEMPLATE % 0xE0,
-    'aqua': COLOR_XTERM_TEMPLATE % 0xC3,
-    'pink': COLOR_XTERM_TEMPLATE % 0xE1,
-    'yellow': COLOR_XTERM_TEMPLATE % 0xE6,
+    'grey': COLOR_XTERM_TEMPLATE % 0x0F,
+    'blue': COLOR_XTERM_TEMPLATE % 0x0C,
+    'green': COLOR_XTERM_TEMPLATE % 0x0A,
+    'red': COLOR_XTERM_TEMPLATE % 0x09,
+    'aqua': COLOR_XTERM_TEMPLATE % 0x0E,
+    'pink': COLOR_XTERM_TEMPLATE % 0x0D,
+    'yellow': COLOR_XTERM_TEMPLATE % 0x0B,
 }
 
 
