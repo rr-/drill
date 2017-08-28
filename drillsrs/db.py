@@ -7,10 +7,11 @@ import sqlalchemy as sa
 import sqlalchemy.orm
 import sqlalchemy.ext.declarative
 import sqlalchemy.ext.mutable
+import xdg
 
 
 def get_db_path() -> str:
-    return os.path.expanduser('~/.local/share/drillsrs/decks.sqlite')
+    return os.path.join(xdg.XDG_DATA_HOME, 'drillsrs/decks.sqlite')
 
 
 engine: Any = sa.create_engine('sqlite:///%s' % os.path.abspath(get_db_path()))

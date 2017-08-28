@@ -16,6 +16,7 @@ setup(
     },
 
     install_requires=[
+        'xdg',
         'python-dateutil',
         'sqlalchemy',
         'jinja2',
