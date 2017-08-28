@@ -1,7 +1,7 @@
 import argparse
 import random
 from datetime import datetime
-from typing import Any, List
+from typing import Optional, Any, List
 from drillsrs.cmd.command_base import CommandBase
 from drillsrs import db, scheduler, util
 
@@ -63,11 +63,14 @@ def _review_single_card(
     return user_answer
 
 
-def _review(session: Any, deck: db.Deck) -> None:
+def _review(session: Any, deck: db.Deck, how_many: Optional[int]) -> None:
     first_iteration = True
+    cards_left = how_many
     while True:
         cards_to_review = scheduler.get_cards_to_review(session, deck)
         random.shuffle(cards_to_review)
+        if cards_left is not None:
+            cards_to_review = cards_to_review[0:cards_left]
 
         if not cards_to_review:
             due_cards = scheduler.get_due_cards(session, deck)
@@ -98,6 +101,8 @@ def _review(session: Any, deck: db.Deck) -> None:
             if user_answer.is_correct:
                 card.due_date = scheduler.next_due_date(card)
                 correct_answer_count += 1
+                if cards_left is not None:
+                    cards_left -= 1
             else:
                 cards_to_review.insert(
                     random.randint(
@@ -115,9 +120,13 @@ class ReviewCommand(CommandBase):
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument('deck', nargs='?', help='choose the deck name')
+        parser.add_argument(
+            '-n', type=int, default=None,
+            help='set max number how many flashcards to review')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck
+        how_many: Optional[int] = args.n
         with db.session_scope() as session:
             deck = db.get_deck_by_name(session, deck_name)
-            _review(session, deck)
+            _review(session, deck, how_many)
