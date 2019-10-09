@@ -7,12 +7,12 @@ from drillsrs import db, scheduler, util
 
 def _learn_single_card(
         index: int,
-        cards_to_study: List[db.Card],
+        num_cards_to_study: int,
         card: db.Card) -> None:
     print('Card #{} ({:.01%} done, {} left)'.format(
         card.num,
-        index / len(cards_to_study),
-        len(cards_to_study) - index))
+        index / num_cards_to_study,
+        num_cards_to_study - index))
     question = 'Question: %s' % card.question
     if card.tags:
         question += ' [%s]' % util.format_card_tags(card.tags)
@@ -54,5 +54,6 @@ class StudyCommand(CommandBase):
                 len(cards_to_study))
             print()
 
+            num_cards_to_study = len(cards_to_study)
             for index, card in enumerate(cards_to_study):
-                _learn_single_card(index, cards_to_study, card)
+                _learn_single_card(index, num_cards_to_study, card)
