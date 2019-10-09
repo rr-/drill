@@ -1,7 +1,6 @@
 import argparse
 import random
 from datetime import datetime
-from typing import List
 from drillsrs.cmd.command_base import CommandBase
 from drillsrs import db, scheduler, util
 from drillsrs.cli_args import Mode
@@ -45,7 +44,7 @@ class StudyCommand(CommandBase):
             '-n', type=int, default=10,
             help='set how many flashcards to study')
         parser.add_argument(
-            '-m', '--mode', type=Mode.parse, default="direct",
+            '-m', '--mode', type=Mode.parse, default=Mode.direct,
             choices=list(Mode), help='learning mode. whether to involve reversed direction')
 
     def run(self, args: argparse.Namespace) -> None:
