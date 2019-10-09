@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Optional, Any, List
 from drillsrs.cmd.command_base import CommandBase
 from drillsrs import db, scheduler, util
+from drillsrs.cli_args import Mode
 
 
 def _review_single_card(
@@ -11,7 +12,7 @@ def _review_single_card(
         correct_answer_count: int,
         cards_to_review: List[db.Card],
         card: db.Card,
-        mode: str) -> db.UserAnswer:
+        mode: Mode) -> db.UserAnswer:
     print('Card #{} ({:.01%} done, {} left, {:.01%} correct)'.format(
         card.num,
         index / len(cards_to_review),
@@ -20,7 +21,7 @@ def _review_single_card(
 
     raw_question = card.question
     raw_answers = card.answers
-    if mode == 'reversed' or mode == 'mixed' and random() > 0.5:
+    if mode is Mode.reversed or mode is Mode.mixed and random.random() > 0.5:
         raw_question, raw_answers = random.choice(raw_answers), [raw_question]
 
     print('Question: %s' % raw_question, end='')
@@ -69,7 +70,7 @@ def _review_single_card(
     return user_answer
 
 
-def _review(session: Any, deck: db.Deck, how_many: Optional[int], mode: Optional[str]) -> None:
+def _review(session: Any, deck: db.Deck, how_many: Optional[int], mode: Mode) -> None:
     first_iteration = True
     cards_left = how_many
     while True:
@@ -130,12 +131,13 @@ class ReviewCommand(CommandBase):
             '-n', type=int, default=None,
             help='set max number how many flashcards to review')
         parser.add_argument(
-            '-m', '--mode', type=str, default="direct",
-            help='mode: direct, reversed, mixed')
+            '-m', '--mode', type=Mode.parse, default=Mode.direct,
+            choices=list(Mode), help='learning mode. whether to involve reversed direction')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck
         how_many: Optional[int] = args.n
+        mode: Mode = args.mode
         with db.session_scope() as session:
             deck = db.get_deck_by_name(session, deck_name)
-            _review(session, deck, how_many, args.mode)
+            _review(session, deck, how_many, mode)

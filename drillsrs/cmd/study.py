@@ -1,16 +1,17 @@
 import argparse
+import random
 from datetime import datetime
-from random import random, choice
 from typing import List
 from drillsrs.cmd.command_base import CommandBase
 from drillsrs import db, scheduler, util
+from drillsrs.cli_args import Mode
 
 
 def _learn_single_card(
         index: int,
         cards_to_study: List[db.Card],
         card: db.Card,
-        mode: str) -> None:
+        mode: Mode) -> None:
     print('Card #{} ({:.01%} done, {} left)'.format(
         card.num,
         index / len(cards_to_study),
@@ -18,8 +19,8 @@ def _learn_single_card(
 
     raw_question = card.question
     raw_answers = card.answers
-    if mode == 'reversed' or mode == 'mixed' and random() > 0.5:
-        raw_question, raw_answers = choice(raw_answers), [raw_question]
+    if mode is Mode.reversed or mode is Mode.mixed and random.random() > 0.5:
+        raw_question, raw_answers = random.choice(raw_answers), [raw_question]
 
     question = 'Question: %s' % raw_question
     if card.tags:
@@ -44,13 +45,13 @@ class StudyCommand(CommandBase):
             '-n', type=int, default=10,
             help='set how many flashcards to study')
         parser.add_argument(
-            '-m', '--mode', type=str, default="direct",
-            help='mode: direct, reversed, mixed')
+            '-m', '--mode', type=Mode.parse, default="direct",
+            choices=list(Mode), help='learning mode. whether to involve reversed direction')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck
         how_many: int = args.n
-        mode: str = args.mode
+        mode: Mode = args.mode
 
         with db.session_scope() as session:
             deck = db.get_deck_by_name(session, deck_name)
