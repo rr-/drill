@@ -1,23 +1,31 @@
 import argparse
+import random
 from datetime import datetime
-from typing import List
 from drillsrs.cmd.command_base import CommandBase
 from drillsrs import db, scheduler, util
+from drillsrs.cli_args import Mode
 
 
 def _learn_single_card(
         index: int,
         num_cards_to_study: int,
-        card: db.Card) -> None:
+        card: db.Card,
+        mode: Mode) -> None:
     print('Card #{} ({:.01%} done, {} left)'.format(
         card.num,
         index / num_cards_to_study,
         num_cards_to_study - index))
-    question = 'Question: %s' % card.question
+
+    raw_question = card.question
+    raw_answers = card.answers
+    if mode is Mode.reversed or mode is Mode.mixed and random.random() > 0.5:
+        raw_question, raw_answers = random.choice(raw_answers), [raw_question]
+
+    question = 'Question: %s' % raw_question
     if card.tags:
         question += ' [%s]' % util.format_card_tags(card.tags)
     util.ask(question)
-    util.ask('Answers: %s' % ', '.join(card.answers))
+    util.ask('Answers: %s' % ', '.join(raw_answers))
     print('')
 
     card.is_active = True
@@ -35,10 +43,14 @@ class StudyCommand(CommandBase):
         parser.add_argument(
             '-n', type=int, default=10,
             help='set how many flashcards to study')
+        parser.add_argument(
+            '-m', '--mode', type=Mode.parse, default=Mode.direct,
+            choices=list(Mode), help='learning mode. whether to involve reversed direction')
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck
         how_many: int = args.n
+        mode: Mode = args.mode
 
         with db.session_scope() as session:
             deck = db.get_deck_by_name(session, deck_name)
@@ -56,4 +68,4 @@ class StudyCommand(CommandBase):
 
             num_cards_to_study = len(cards_to_study)
             for index, card in enumerate(cards_to_study):
-                _learn_single_card(index, num_cards_to_study, card)
+                _learn_single_card(index, num_cards_to_study, card, mode)
