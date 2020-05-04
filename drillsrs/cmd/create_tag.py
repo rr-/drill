@@ -15,7 +15,8 @@ class CreateTagCommand(CommandBase):
             '-n', '--name', required=True, help='set the tag\'s name')
         parser.add_argument(
             '-c', '--color', required=False, choices=util.COLOR_TAGS.keys(),
-            help='set the tag\'s color')
+            help='set the tag\'s color',
+            default=list(util.COLOR_TAGS.keys())[0])
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck
