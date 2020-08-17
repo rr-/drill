@@ -5,6 +5,7 @@ from typing import Optional, Any, List
 from drillsrs.cmd.command_base import CommandBase
 from drillsrs import db, scheduler, util
 from drillsrs.cli_args import Mode
+from drillsrs.question import render_question_prompt
 
 
 def _review_single_card(
@@ -24,11 +25,7 @@ def _review_single_card(
     if mode is Mode.reversed or mode is Mode.mixed and random.random() > 0.5:
         raw_question, raw_answers = random.choice(raw_answers), [raw_question]
 
-    print('Question: %s' % raw_question, end='')
-    if card.tags:
-        print(' [%s]' % util.format_card_tags(card.tags), end='')
-    print()
-
+    print(render_question_prompt(raw_question, raw_answers, card.tags))
     while True:
         answer_text = util.ask('Answer: ')
         if answer_text:

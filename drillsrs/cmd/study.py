@@ -4,6 +4,7 @@ from datetime import datetime
 from drillsrs.cmd.command_base import CommandBase
 from drillsrs import db, scheduler, util
 from drillsrs.cli_args import Mode
+from drillsrs.question import render_question_prompt
 
 
 def _learn_single_card(
@@ -21,10 +22,7 @@ def _learn_single_card(
     if mode is Mode.reversed or mode is Mode.mixed and random.random() > 0.5:
         raw_question, raw_answers = random.choice(raw_answers), [raw_question]
 
-    question = 'Question: %s' % raw_question
-    if card.tags:
-        question += ' [%s]' % util.format_card_tags(card.tags)
-    util.ask(question)
+    util.ask(render_question_prompt(raw_question, raw_answers, card.tags))
     util.ask('Answers: %s' % ', '.join(raw_answers))
     print('')
 
