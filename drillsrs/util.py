@@ -77,3 +77,11 @@ def get_data(file_name: str) -> str:
     template_path = os.path.join(here, 'data', file_name)
     with open(template_path, 'r') as handle:
         return handle.read()
+
+
+def is_raw_multiline(raw_str: str) -> bool:
+    return r'\n' in raw_str
+
+
+def from_raw_to_multiline(raw_str: str) -> str:
+    return raw_str.replace(r'\n', '\n')
