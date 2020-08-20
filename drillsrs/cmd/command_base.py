@@ -1,14 +1,13 @@
 import argparse
-from typing import List, TypeVar, Type
+from typing import List, Type, TypeVar
 
-
-T = TypeVar('T', bound='CommandBase')
+T = TypeVar("T", bound="CommandBase")
 
 
 class CommandBase:
     names: List[str] = []
-    description: str = ''
-    registry: List['CommandBase'] = []
+    description: str = ""
+    registry: List["CommandBase"] = []
 
     def __init_subclass__(cls: Type[T]) -> None:
         cls.registry.append(cls())

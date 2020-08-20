@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
-from typing import List, Optional, Any
-from drillsrs import db
+from typing import Any, List, Optional
 
+from drillsrs import db
 
 THRESHOLDS = [
     timedelta(seconds=0),
@@ -41,13 +41,15 @@ def next_due_date(card: db.Card) -> Optional[datetime]:
 
 
 def get_cards_to_study(
-        session: Any, deck: db.Deck, how_many: int) -> List[db.Card]:
+    session: Any, deck: db.Deck, how_many: int
+) -> List[db.Card]:
     return list(
         session.query(db.Card)
         .filter(db.Card.deck_id == deck.id)
         .filter(db.Card.is_active == 0)
         .order_by(db.Card.num.asc())
-        .limit(how_many))
+        .limit(how_many)
+    )
 
 
 def get_due_cards(session: Any, deck: db.Deck) -> List[db.Card]:
@@ -55,11 +57,13 @@ def get_due_cards(session: Any, deck: db.Deck) -> List[db.Card]:
         session.query(db.Card)
         .filter(db.Card.deck_id == deck.id)
         .filter(db.Card.is_active)
-        .order_by(db.Card.due_date.asc()))
+        .order_by(db.Card.due_date.asc())
+    )
 
 
 def get_cards_to_review(session: Any, deck: db.Deck) -> List[db.Card]:
     return [
         card
         for card in get_due_cards(session, deck)
-        if card.due_date and datetime.now() >= card.due_date]
+        if card.due_date and datetime.now() >= card.due_date
+    ]

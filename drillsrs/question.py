@@ -1,6 +1,5 @@
 from drillsrs import util
 
-
 question_prompt = "Question:"
 
 

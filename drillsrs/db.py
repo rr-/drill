@@ -1,20 +1,22 @@
 import os
 from contextlib import contextmanager
 from datetime import datetime
-from typing import List, Generator, Any, Optional
-from drillsrs import error
+from typing import Any, Generator, List, Optional
+
 import sqlalchemy as sa
-import sqlalchemy.orm
 import sqlalchemy.ext.declarative
 import sqlalchemy.ext.mutable
+import sqlalchemy.orm
 import xdg
+
+from drillsrs import error
 
 
 def get_db_path() -> str:
-    return os.path.join(xdg.XDG_DATA_HOME, 'drillsrs/decks.sqlite')
+    return os.path.join(xdg.XDG_DATA_HOME, "drillsrs/decks.sqlite")
 
 
-engine: Any = sa.create_engine('sqlite:///%s' % os.path.abspath(get_db_path()))
+engine: Any = sa.create_engine("sqlite:///%s" % os.path.abspath(get_db_path()))
 session_maker: Any = sa.orm.session.sessionmaker(bind=engine, autoflush=False)
 Base: Any = sa.ext.declarative.declarative_base()
 
@@ -33,103 +35,123 @@ def session_scope() -> Generator:
 
 
 class UserAnswer(Base):
-    __tablename__ = 'user_answer'
+    __tablename__ = "user_answer"
 
-    id: int = sa.Column('id', sa.Integer, primary_key=True)
+    id: int = sa.Column("id", sa.Integer, primary_key=True)
     card_id: int = sa.Column(
-        'card_id', sa.Integer, sa.ForeignKey('card.id'),
-        nullable=False, index=True)
-    date: datetime = sa.Column('date', sa.DateTime, nullable=False)
-    is_correct: bool = sa.Column('is_correct', sa.Boolean, nullable=False)
+        "card_id",
+        sa.Integer,
+        sa.ForeignKey("card.id"),
+        nullable=False,
+        index=True,
+    )
+    date: datetime = sa.Column("date", sa.DateTime, nullable=False)
+    is_correct: bool = sa.Column("is_correct", sa.Boolean, nullable=False)
 
 
 class CardTag(Base):
-    __tablename__ = 'card_tag'
+    __tablename__ = "card_tag"
 
     card_id = sa.Column(
-        'card_id',
+        "card_id",
         sa.Integer,
-        sa.ForeignKey('card.id'),
+        sa.ForeignKey("card.id"),
         primary_key=True,
         nullable=False,
-        index=True)
+        index=True,
+    )
     tag_id = sa.Column(
-        'tag_id',
+        "tag_id",
         sa.Integer,
-        sa.ForeignKey('tag.id'),
+        sa.ForeignKey("tag.id"),
         primary_key=True,
         nullable=False,
-        index=True)
+        index=True,
+    )
 
 
 class Tag(Base):
-    __tablename__ = 'tag'
+    __tablename__ = "tag"
 
-    id: int = sa.Column('id', sa.Integer, primary_key=True)
+    id: int = sa.Column("id", sa.Integer, primary_key=True)
     deck_id: int = sa.Column(
-        'deck_id', sa.Integer, sa.ForeignKey('deck.id'),
-        nullable=False, index=True)
-    name: str = sa.Column('name', sa.String, nullable=False)
-    color: str = sa.Column('color', sa.String, nullable=False)
+        "deck_id",
+        sa.Integer,
+        sa.ForeignKey("deck.id"),
+        nullable=False,
+        index=True,
+    )
+    name: str = sa.Column("name", sa.String, nullable=False)
+    color: str = sa.Column("color", sa.String, nullable=False)
 
 
 class Card(Base):
-    __tablename__ = 'card'
+    __tablename__ = "card"
 
-    id: int = sa.Column('id', sa.Integer, primary_key=True)
+    id: int = sa.Column("id", sa.Integer, primary_key=True)
     deck_id: int = sa.Column(
-        'deck_id', sa.Integer, sa.ForeignKey('deck.id'),
-        nullable=False, index=True)
-    num: int = sa.Column('num', sa.Integer, nullable=False)
-    question: str = sa.Column('question', sa.String, nullable=False)
+        "deck_id",
+        sa.Integer,
+        sa.ForeignKey("deck.id"),
+        nullable=False,
+        index=True,
+    )
+    num: int = sa.Column("num", sa.Integer, nullable=False)
+    question: str = sa.Column("question", sa.String, nullable=False)
     answers: List[str] = sa.Column(
-        'answers', sa.ext.mutable.MutableList.as_mutable(sa.PickleType),
-        nullable=False)
-    is_active: bool = sa.Column('active', sa.Boolean, nullable=False)
+        "answers",
+        sa.ext.mutable.MutableList.as_mutable(sa.PickleType),
+        nullable=False,
+    )
+    is_active: bool = sa.Column("active", sa.Boolean, nullable=False)
     activation_date: datetime = sa.Column(
-        'activation_date', sa.DateTime, nullable=True, index=True)
-    user_answers = sa.orm.relationship(UserAnswer, cascade='all, delete')
-    tags = sa.orm.relationship('Tag', backref='cards', secondary='card_tag')
+        "activation_date", sa.DateTime, nullable=True, index=True
+    )
+    user_answers = sa.orm.relationship(UserAnswer, cascade="all, delete")
+    tags = sa.orm.relationship("Tag", backref="cards", secondary="card_tag")
     due_date: Optional[datetime] = sa.Column(
-        'due_date', sa.DateTime, nullable=True)
+        "due_date", sa.DateTime, nullable=True
+    )
 
     first_answer_date = sa.orm.column_property(
-        sa.sql.expression.select(
-            [sa.sql.expression.func.min(UserAnswer.date)])
+        sa.sql.expression.select([sa.sql.expression.func.min(UserAnswer.date)])
         .where(UserAnswer.card_id == id)
-        .correlate_except(UserAnswer))
+        .correlate_except(UserAnswer)
+    )
 
     total_answer_count = sa.orm.column_property(
-        sa.sql.expression.select(
-            [sa.sql.expression.func.count(UserAnswer.id)])
+        sa.sql.expression.select([sa.sql.expression.func.count(UserAnswer.id)])
         .where(UserAnswer.card_id == id)
-        .correlate_except(UserAnswer))
+        .correlate_except(UserAnswer)
+    )
 
     correct_answer_count = sa.orm.column_property(
-        sa.sql.expression.select(
-            [sa.sql.expression.func.count(UserAnswer.id)])
+        sa.sql.expression.select([sa.sql.expression.func.count(UserAnswer.id)])
         .where(UserAnswer.card_id == id)
         .where(UserAnswer.is_correct == 1)
-        .correlate_except(UserAnswer))
+        .correlate_except(UserAnswer)
+    )
 
     incorrect_answer_count = sa.orm.column_property(
-        sa.sql.expression.select(
-            [sa.sql.expression.func.count(UserAnswer.id)])
+        sa.sql.expression.select([sa.sql.expression.func.count(UserAnswer.id)])
         .where(UserAnswer.card_id == id)
         .where(UserAnswer.is_correct == 0)
-        .correlate_except(UserAnswer))
+        .correlate_except(UserAnswer)
+    )
 
 
 class Deck(Base):
-    __tablename__ = 'deck'
+    __tablename__ = "deck"
 
-    id: int = sa.Column('id', sa.Integer, primary_key=True)
+    id: int = sa.Column("id", sa.Integer, primary_key=True)
     cards: List[Card] = sa.orm.relationship(
-        Card, cascade='all, delete', backref='deck')
-    tags: List[Tag] = sa.orm.relationship(Tag, cascade='all, delete')
-    name: str = sa.Column('name', sa.String, nullable=False)
+        Card, cascade="all, delete", backref="deck"
+    )
+    tags: List[Tag] = sa.orm.relationship(Tag, cascade="all, delete")
+    name: str = sa.Column("name", sa.String, nullable=False)
     description: Optional[str] = sa.Column(
-        'description', sa.String, nullable=True)
+        "description", sa.String, nullable=True
+    )
 
 
 def init() -> None:
@@ -142,10 +164,12 @@ def try_get_deck_by_name(session: Any, name: str) -> Optional[Deck]:
     if not name:
         if deck_count < 1:
             raise error.DeckNotFoundError(
-                'No deck available. Create one first.')
+                "No deck available. Create one first."
+            )
         if deck_count > 1:
             raise error.AmbiguousDeckError(
-                'Need to specify which deck to use.')
+                "Need to specify which deck to use."
+            )
         return session.query(Deck).one()
     return session.query(Deck).filter(Deck.name == name).one_or_none()
 
@@ -154,76 +178,70 @@ def get_deck_by_name(session: Any, name: str) -> Deck:
     deck = try_get_deck_by_name(session, name)
     if deck:
         return deck
-    raise error.DeckNotFoundError('A deck with name %r doesn\'t exist' % name)
+    raise error.DeckNotFoundError("A deck with name %r doesn't exist" % name)
 
 
 def try_get_card_by_num(session: Any, deck: Deck, num: int) -> Optional[Card]:
-    return session.query(Card) \
-        .filter(Card.deck_id == deck.id) \
-        .filter(Card.num == num) \
+    return (
+        session.query(Card)
+        .filter(Card.deck_id == deck.id)
+        .filter(Card.num == num)
         .one_or_none()
+    )
 
 
 def get_card_by_num(session: Any, deck: Deck, num: int) -> Card:
     card = try_get_card_by_num(session, deck, num)
     if card:
         return card
-    raise error.CardNotFoundError('A card with ID %r doesn\'t exist' % num)
+    raise error.CardNotFoundError("A card with ID %r doesn't exist" % num)
 
 
 def get_max_card_num(session: Any, deck: Deck) -> int:
     return (
-        session
-        .query(sa.func.max(Card.num))
+        session.query(sa.func.max(Card.num))
         .filter(Card.deck_id == deck.id)
-        .scalar()) or 0
+        .scalar()
+    ) or 0
 
 
 def get_max_active_card_num(session: Any, deck: Deck) -> int:
     return (
-        session
-        .query(sa.func.max(Card.num))
+        session.query(sa.func.max(Card.num))
         .filter(Card.deck_id == deck.id)
         .filter(Card.is_active == 1)
-        .scalar()) or 0
+        .scalar()
+    ) or 0
 
 
 def move_card(session: Any, card: Card, new_num: int) -> Card:
     if card.num is not None:
         if new_num > card.num:
-            session \
-                .query(Card) \
-                .filter(Card.deck_id == card.deck.id) \
-                .filter(Card.num > card.num) \
-                .filter(Card.num <= new_num) \
-                .update({'num': Card.num - 1})
+            session.query(Card).filter(Card.deck_id == card.deck.id).filter(
+                Card.num > card.num
+            ).filter(Card.num <= new_num).update({"num": Card.num - 1})
         else:
-            session \
-                .query(Card) \
-                .filter(Card.deck_id == card.deck.id) \
-                .filter(Card.num >= new_num) \
-                .filter(Card.num < card.num) \
-                .update({'num': Card.num + 1})
+            session.query(Card).filter(Card.deck_id == card.deck.id).filter(
+                Card.num >= new_num
+            ).filter(Card.num < card.num).update({"num": Card.num + 1})
     else:
-        session \
-            .query(Card) \
-            .filter(Card.deck_id == card.deck.id) \
-            .filter(Card.num >= new_num) \
-            .update({'num': Card.num + 1})
+        session.query(Card).filter(Card.deck_id == card.deck.id).filter(
+            Card.num >= new_num
+        ).update({"num": Card.num + 1})
     card.num = new_num
 
 
 def try_get_tag_by_name(session: Any, deck: Deck, name: str) -> Optional[Tag]:
     return (
-        session
-        .query(Tag)
+        session.query(Tag)
         .filter(Tag.deck_id == deck.id)
         .filter(Tag.name == name)
-        .one_or_none())
+        .one_or_none()
+    )
 
 
 def get_tag_by_name(session: Any, deck: Deck, name: str) -> Tag:
     card = try_get_tag_by_name(session, deck, name)
     if card:
         return card
-    raise error.TagNotFoundError('A tag with name %r doesn\'t exist' % name)
+    raise error.TagNotFoundError("A tag with name %r doesn't exist" % name)

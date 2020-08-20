@@ -1,32 +1,46 @@
 import argparse
 from typing import List
+
 import sqlalchemy as sa
-from drillsrs.cmd.command_base import CommandBase
+
 from drillsrs import db
+from drillsrs.cmd.command_base import CommandBase
 
-
-PREPEND = 'prepend'
-APPEND = 'append'
+PREPEND = "prepend"
+APPEND = "append"
 
 
 class CreateCardCommand(CommandBase):
-    names = ['add-card', 'create-card']
-    description = 'add a new flashcard to a deck'
+    names = ["add-card", "create-card"]
+    description = "add a new flashcard to a deck"
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            'deck', nargs='?', help='choose the deck to add the card to')
+            "deck", nargs="?", help="choose the deck to add the card to"
+        )
         parser.add_argument(
-            '-q', '--question', required=True,
-            help='set the card\'s question text')
+            "-q",
+            "--question",
+            required=True,
+            help="set the card's question text",
+        )
         parser.add_argument(
-            '-a', '--answer', required=True, nargs='+',
-            help='set the card\'s answers text')
+            "-a",
+            "--answer",
+            required=True,
+            nargs="+",
+            help="set the card's answers text",
+        )
         parser.add_argument(
-            '-t', '--tag', nargs='*', help='add optional tags to the card')
+            "-t", "--tag", nargs="*", help="add optional tags to the card"
+        )
         parser.add_argument(
-            '-p', '--place', choices=(PREPEND, APPEND), default=PREPEND,
-            help='choose where to put the card in the deck')
+            "-p",
+            "--place",
+            choices=(PREPEND, APPEND),
+            default=PREPEND,
+            help="choose where to put the card in the deck",
+        )
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck
@@ -44,8 +58,8 @@ class CreateCardCommand(CommandBase):
             card.question = question
             card.answers = answers
             card.tags = [
-                db.get_tag_by_name(session, deck, tag)
-                for tag in tags]
+                db.get_tag_by_name(session, deck, tag) for tag in tags
+            ]
             card.is_active = False
             card.due_date = None
             deck.cards.append(card)

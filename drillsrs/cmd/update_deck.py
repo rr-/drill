@@ -1,16 +1,17 @@
 import argparse
 from typing import Optional
-from drillsrs.cmd.command_base import CommandBase
+
 from drillsrs import db
+from drillsrs.cmd.command_base import CommandBase
 
 
 class UpdateDeckCommand(CommandBase):
-    names = ['edit-deck', 'update-deck']
-    description = 'edit a single deck'
+    names = ["edit-deck", "update-deck"]
+    description = "edit a single deck"
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('deck', help='set the deck name')
-        parser.add_argument('--description', help='set the deck description')
+        parser.add_argument("deck", help="set the deck name")
+        parser.add_argument("--description", help="set the deck description")
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck

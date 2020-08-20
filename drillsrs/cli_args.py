@@ -17,6 +17,6 @@ class ArgEnum(enum.Enum):
 
 
 class Mode(ArgEnum):
-    direct = 'direct'
-    reversed = 'reversed'
-    mixed = 'mixed'
+    direct = "direct"
+    reversed = "reversed"
+    mixed = "mixed"

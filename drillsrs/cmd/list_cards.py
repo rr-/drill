@@ -1,55 +1,65 @@
 import argparse
-from typing import Optional
 from datetime import datetime
-from math import log10, ceil
+from math import ceil, log10
+from typing import Optional
+
 import sqlalchemy as sa
-from drillsrs.cmd.command_base import CommandBase
+
 from drillsrs import db, util
+from drillsrs.cmd.command_base import CommandBase
 
-
-SORT_NONE = 'none'
-SORT_DUE_DATE = 'due-date'
+SORT_NONE = "none"
+SORT_DUE_DATE = "due-date"
 
 
 def _print_single_card(
-        index_length: int, card: db.Card, show_answers: bool) -> None:
-    print('Card %*s: ' % (index_length, '#%s' % card.num), end='')
+    index_length: int, card: db.Card, show_answers: bool
+) -> None:
+    print("Card %*s: " % (index_length, "#%s" % card.num), end="")
     if card.is_active:
         correct_user_answers = [
-            ua for ua in card.user_answers if ua.is_correct]
+            ua for ua in card.user_answers if ua.is_correct
+        ]
 
         due_date = card.due_date
         assert due_date
 
         print(
-            '(answered %d time(s), %6.02f%% correct, due %s)' % (
+            "(answered %d time(s), %6.02f%% correct, due %s)"
+            % (
                 len(card.user_answers),
                 len(correct_user_answers) * 100.0 / len(card.user_answers)
                 if card.user_answers
                 else 100,
-                util.format_timedelta(due_date - datetime.now())),
-            end=' ')
-    print(card.question, end='')
+                util.format_timedelta(due_date - datetime.now()),
+            ),
+            end=" ",
+        )
+    print(card.question, end="")
     if show_answers:
-        print(': %s' % ', '.join(card.answers), end='')
+        print(": %s" % ", ".join(card.answers), end="")
     if card.tags:
-        print(' [%s]' % util.format_card_tags(card.tags), end='')
+        print(" [%s]" % util.format_card_tags(card.tags), end="")
     print()
 
 
 class ListCardsCommand(CommandBase):
-    names = ['list-cards']
-    description = 'print all flashcards in a deck'
+    names = ["list-cards"]
+    description = "print all flashcards in a deck"
 
     def decorate_arg_parser(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument('deck', nargs='?', help='choose the deck name')
-        parser.add_argument('-q', '--question', help='filter by question text')
-        parser.add_argument('-t', '--tag', help='filter by tag')
+        parser.add_argument("deck", nargs="?", help="choose the deck name")
+        parser.add_argument("-q", "--question", help="filter by question text")
+        parser.add_argument("-t", "--tag", help="filter by tag")
         parser.add_argument(
-            '--sort', default=SORT_NONE, choices=(SORT_NONE, SORT_DUE_DATE),
-            help='change sort style')
+            "--sort",
+            default=SORT_NONE,
+            choices=(SORT_NONE, SORT_DUE_DATE),
+            help="change sort style",
+        )
         parser.add_argument(
-            '--show-answers', action='store_true', help='show answers text')
+            "--show-answers", action="store_true", help="show answers text"
+        )
 
     def run(self, args: argparse.Namespace) -> None:
         deck_name: str = args.deck
@@ -60,15 +70,18 @@ class ListCardsCommand(CommandBase):
 
         with db.session_scope() as session:
             deck = db.get_deck_by_name(session, deck_name)
-            cards = session \
-                .query(db.Card) \
-                .filter(db.Card.deck_id == deck.id) \
-                .options(sa.orm.subqueryload('user_answers'))
+            cards = (
+                session.query(db.Card)
+                .filter(db.Card.deck_id == deck.id)
+                .options(sa.orm.subqueryload("user_answers"))
+            )
 
             if question is not None:
                 cards = cards.filter(
                     sa.func.lower(db.Card.question).like(
-                        sa.func.lower(question)))
+                        sa.func.lower(question)
+                    )
+                )
 
             if sort_style == SORT_NONE:
                 cards = cards.order_by(db.Card.num.asc())
@@ -84,10 +97,11 @@ class ListCardsCommand(CommandBase):
                 cards = [
                     card
                     for card in cards
-                    if tag.lower() in [t.name.lower() for t in card.tags]]
+                    if tag.lower() in [t.name.lower() for t in card.tags]
+                ]
 
             if not cards:
-                print('No cards to show.')
+                print("No cards to show.")
                 return
 
             index_length = ceil(log10(db.get_max_card_num(session, deck)))
