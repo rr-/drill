@@ -1,12 +1,34 @@
 import argparse
 import json
 import sys
+import io
 from typing import IO, Any, Optional
 
 from dateutil.parser import parse as parse_date
+from anki_export import ApkgReader
+from lxml import etree
 
 from drillsrs import db, scheduler, util
 from drillsrs.cmd.command_base import CommandBase
+
+
+def tojson(filepath):
+    with ApkgReader(filepath) as apkg:
+        temp = apkg.export()
+    temp = temp[list(temp)[0]]
+    x = {"name":temp[1][3], "description":None, "tags":[], "cards":[]}
+    counter = 1
+    for s in temp[1:]:
+        card = {"active":False,"activation_date":None,"tags":[],"user_answers":[]}
+        card["id"] = counter
+        q = etree.HTML(s[0])
+        card["question"] = etree.tostring(q, encoding='unicode', method='text')
+        a = etree.HTML(s[1])
+        card["answers"] = [" "] if a is None else [etree.tostring(a, encoding='unicode', method='text')]
+        counter = counter + 1
+        x["cards"].append(card)
+    return(json.dumps(x))
+
 
 
 def _import(handle: IO[Any]) -> None:
@@ -70,11 +92,21 @@ class ImportCommand(CommandBase):
             nargs="?",
             help="path to import from; if omitted, standard input is used",
         )
+        parser.add_argument(
+            "-a",
+            action="store_true",
+            help="Import Anki Deck",
+        )
 
     def run(self, args: argparse.Namespace) -> None:
         path: Optional[str] = args.path
+        anki = args.a
         if path:
-            with open(path, "r") as handle:
+            if anki:
+                handle = io.StringIO(tojson(path))
                 _import(handle)
+            else:
+                with open(path, "r") as handle:
+                    _import(handle)
         else:
             _import(sys.stdin)
