@@ -9,7 +9,10 @@ setup(
     url="https://github.com/rr-/drill",
     packages=find_packages(),
     entry_points={"console_scripts": ["drill-srs = drillsrs.__main__:main"]},
-    install_requires=["xdg", "python-dateutil", "sqlalchemy", "jinja2", "lxml", "anki-export"],
+    install_requires=["xdg", "python-dateutil", "sqlalchemy", "jinja2"],
+    extras_require={
+        "anki": ["lxml", "anki-export"],
+    },
     package_dir={"drillsrs": "drillsrs"},
     package_data={"drillsrs": ["data/*.*"]},
     classifiers=[
