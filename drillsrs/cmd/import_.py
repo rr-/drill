@@ -10,7 +10,7 @@ from drillsrs import db, scheduler, util
 from drillsrs.cmd.command_base import CommandBase
 
 
-def tojson(filepath: str) -> str:
+def apkg_to_json(filepath: str) -> str:
     try:
         from anki_export import ApkgReader
     except ImportError:
@@ -24,9 +24,8 @@ def tojson(filepath: str) -> str:
     with ApkgReader(filepath) as apkg:
         temp = apkg.export()
     temp = temp[list(temp)[0]]
-    x = {"name": temp[1][3], "description": None, "tags": [], "cards": []}
-    counter = 1
-    for s in temp[1:]:
+    ret = {"name": temp[1][3], "description": None, "tags": [], "cards": []}
+    for counter, anki_card in enumerate(temp[1:], start=1):
         card = {
             "active": False,
             "activation_date": None,
@@ -34,17 +33,16 @@ def tojson(filepath: str) -> str:
             "user_answers": [],
         }
         card["id"] = counter
-        q = etree.HTML(s[0])
-        card["question"] = etree.tostring(q, encoding="unicode", method="text")
-        a = etree.HTML(s[1])
+        question = etree.HTML(anki_card[0])
+        card["question"] = etree.tostring(question, encoding="unicode", method="text")
+        answer = etree.HTML(anki_card[1])
         card["answers"] = (
             [" "]
-            if a is None
-            else [etree.tostring(a, encoding="unicode", method="text")]
+            if answer is None
+            else [etree.tostring(answer, encoding="unicode", method="text")]
         )
-        counter = counter + 1
-        x["cards"].append(card)
-    return json.dumps(x)
+        ret["cards"].append(card)
+    return json.dumps(ret)
 
 
 def _import(handle: IO[Any]) -> None:
@@ -107,17 +105,17 @@ class ImportCommand(CommandBase):
             help="path to import from; if omitted, standard input is used",
         )
         parser.add_argument(
-            "-a",
+            "--anki",
             action="store_true",
-            help="Import Anki Deck",
+            help="import anki deck",
         )
 
     def run(self, args: argparse.Namespace) -> None:
         path: Optional[str] = args.path
-        anki: Optional[bool] = args.a
+        anki: Optional[bool] = args.anki
         if path:
             if anki:
-                handle = io.StringIO(tojson(path))
+                handle = io.StringIO(apkg_to_json(path))
                 _import(handle)
             else:
                 with open(path, "r") as handle:
