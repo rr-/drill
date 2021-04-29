@@ -40,4 +40,5 @@ def get_all_commands() -> List[CommandBase]:
         ReviewCommand(),
         StatsCommand(),
         ExportCommand(),
+        ImportCommand(),
     ]
