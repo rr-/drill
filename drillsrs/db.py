@@ -117,12 +117,14 @@ class Card(Base):
         sa.sql.expression.select([sa.sql.expression.func.min(UserAnswer.date)])
         .where(UserAnswer.card_id == id)
         .correlate_except(UserAnswer)
+        .scalar_subquery()
     )
 
     total_answer_count = sa.orm.column_property(
         sa.sql.expression.select([sa.sql.expression.func.count(UserAnswer.id)])
         .where(UserAnswer.card_id == id)
         .correlate_except(UserAnswer)
+        .scalar_subquery()
     )
 
     correct_answer_count = sa.orm.column_property(
@@ -130,6 +132,7 @@ class Card(Base):
         .where(UserAnswer.card_id == id)
         .where(UserAnswer.is_correct == 1)
         .correlate_except(UserAnswer)
+        .scalar_subquery()
     )
 
     incorrect_answer_count = sa.orm.column_property(
@@ -137,6 +140,7 @@ class Card(Base):
         .where(UserAnswer.card_id == id)
         .where(UserAnswer.is_correct == 0)
         .correlate_except(UserAnswer)
+        .scalar_subquery()
     )
 
 
