@@ -69,6 +69,7 @@ def _get_max_answer_count(session: Any, deck: db.Deck) -> int:
     return (
         session.query(tmp)
         .join(db.Card)
+        .join(db.Deck)
         .group_by(db.Card.id)
         .filter(db.Deck.id == deck.id)
         .order_by(tmp.desc())
@@ -81,6 +82,7 @@ def _get_correct_answer_count(session: Any, deck: db.Deck) -> int:
     return (
         session.query(sa.func.count(db.UserAnswer.id))
         .join(db.Card)
+        .join(db.Deck)
         .filter(db.UserAnswer.is_correct == 1)
         .filter(db.Deck.id == deck.id)
         .scalar()
@@ -91,6 +93,7 @@ def _get_incorrect_answer_count(session: Any, deck: db.Deck) -> int:
     return (
         session.query(sa.func.count(db.UserAnswer.id))
         .join(db.Card)
+        .join(db.Deck)
         .filter(db.UserAnswer.is_correct == 0)
         .filter(db.Deck.id == deck.id)
         .scalar()
@@ -100,6 +103,7 @@ def _get_incorrect_answer_count(session: Any, deck: db.Deck) -> int:
 def _get_active_card_count(session: Any, deck: db.Deck) -> int:
     return (
         session.query(sa.func.count(db.Card.id))
+        .join(db.Deck)
         .filter(db.Card.is_active == 1)
         .filter(db.Deck.id == deck.id)
         .scalar()
@@ -109,6 +113,7 @@ def _get_active_card_count(session: Any, deck: db.Deck) -> int:
 def _get_inactive_card_count(session: Any, deck: db.Deck) -> int:
     return (
         session.query(sa.func.count(db.Card.id))
+        .join(db.Deck)
         .filter(db.Card.is_active == 0)
         .filter(db.Deck.id == deck.id)
         .scalar()
@@ -192,6 +197,7 @@ def _get_bad_cards(
     ratio = db.Card.correct_answer_count * 1.0 / db.Card.total_answer_count
     return list(
         session.query(db.Card)
+        .join(db.Deck)
         .filter(db.Deck.id == deck.id)
         .filter(ratio < threshold)
         .order_by(ratio.asc())
