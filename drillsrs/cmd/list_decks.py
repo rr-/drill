@@ -22,6 +22,7 @@ class ListDecksCommand(CommandBase):
             for deck_id, name, description in results:
                 card_count = (
                     session.query(sa.func.count(db.Deck.cards))
+                    .join(db.Card)
                     .filter(db.Deck.id == deck_id)
                     .scalar()
                 )
